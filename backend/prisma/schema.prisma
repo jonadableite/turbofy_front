@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Merchant {
+  id                String     @id @default(uuid())
+  name              String
+  email             String     @unique
+  document          String     @unique
+  active            Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  payments          Payment[]
+  pixKeys           PixKey[]
+  charges           Charge[]
+  chargeSplits      ChargeSplit[]
+  balance           Decimal    @default(0)
+  fee               Decimal    @default(0)
+  bankAccount       BankAccount?
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  roles         String[]
+  document      String   @unique  // CPF ou CNPJ
+  phone         String?          // Telefone para SMS/WhatsApp MFA futuro
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  otps          UserOtp[]
+  tokens        UserToken[]
+}
+
+model UserOtp {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  codeHash    String
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+model UserToken {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  tokenHash    String   @unique
+  revokedAt    DateTime?
+  replacedBy   String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuthAttempt {
+  id           String   @id @default(uuid())
+  email        String
+  ip           String
+  count        Int      @default(0)
+  windowStart  DateTime @default(now())
+  lockedUntil  DateTime?
+  createdAt    DateTime @default(now())
+
+  @@unique([email, ip])
+}
+
+model Payment {
+  id                String     @id @default(uuid())
+  amount            Decimal
+  description       String
+  merchantId        String
+  merchant          Merchant   @relation(fields: [merchantId], references: [id])
+  status            String
+  method            String
+  customerEmail     String
+  customerName      String
+  customerDocument  String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  expiresAt         DateTime?
+  metadata          Json?
+  transactionId     String?
+  splitRules        SplitRule[]
+}
+
+model PixKey {
+  id                String     @id @default(uuid())
+  merchantId        String
+  merchant          Merchant   @relation(fields: [merchantId], references: [id])
+  type              String
+  key               String     @unique
+  description       String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  isActive          Boolean    @default(true)
+}
+
+model BankAccount {
+  id                String     @id @default(uuid())
+  merchantId        String     @unique
+  merchant          Merchant   @relation(fields: [merchantId], references: [id])
+  bankName          String
+  bankCode          String
+  accountType       String
+  accountNumber     String
+  accountDigit      String
+  branchNumber      String
+  branchDigit       String?
+  document          String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model SplitRule {
+  id                String     @id @default(uuid())
+  paymentId         String
+  payment           Payment    @relation(fields: [paymentId], references: [id])
+  merchantId        String
+  amount            Decimal
+  percentage        Decimal?
+  createdAt         DateTime   @default(now())
+}
+
+/// ---------------------------------------
+/// Charge models (nova geração de cobranças)
+/// ---------------------------------------
+
+enum ChargeStatus {
+  PENDING
+  PAID
+  EXPIRED
+  CANCELED
+}
+
+model Charge {
+  id               String        @id @default(uuid())
+  merchantId       String
+  merchant         Merchant      @relation(fields: [merchantId], references: [id])
+  amountCents      Int
+  currency         String        @default("BRL")
+  description      String?
+  status           ChargeStatus  @default(PENDING)
+  method           String?                       // PIX ou BOLETO
+  expiresAt        DateTime?
+  idempotencyKey   String        @unique
+  externalRef      String?       @unique
+  metadata         Json?
+  pixQrCode        String?                       // dados base64 do QR Code
+  pixCopyPaste     String?                       // payload do código de copia e cola
+  boletoUrl        String?                       // URL/linha digitável do boleto
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  splits           ChargeSplit[]
+  fees             Fee[]
+
+  @@index([merchantId])
+}
+
+model ChargeSplit {
+  id           String   @id @default(uuid())
+  chargeId     String
+  charge       Charge   @relation(fields: [chargeId], references: [id])
+  merchantId   String
+  merchant     Merchant @relation(fields: [merchantId], references: [id])
+  amountCents  Int
+  percentage   Decimal?
+  createdAt    DateTime @default(now())
+
+  @@index([chargeId])
+  @@index([merchantId])
+}
+
+model Fee {
+  id           String   @id @default(uuid())
+  chargeId     String
+  charge       Charge   @relation(fields: [chargeId], references: [id])
+  type         String
+  amountCents  Int
+  createdAt    DateTime @default(now())
+
+  @@index([chargeId])
+}

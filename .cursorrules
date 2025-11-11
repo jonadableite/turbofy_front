@@ -1,0 +1,302 @@
+# Turbofy - Gateway de Pagamentos - Regras do Projeto
+
+## 🎯 Visão Geral
+
+Turbofy é um gateway de pagamentos completo com dashboard SaaS para gestão financeira, cobranças, relatórios e controle de repasses.
+
+## 🏗️ Arquitetura e Padrões
+
+### Arquitetura Hexagonal (Ports & Adapters)
+
+- **Domain**: Entidades e regras de negócio puras (sem dependências externas)
+- **Application**: Casos de uso e serviços de aplicação
+- **Infrastructure**: Implementações concretas (DB, APIs externas, RabbitMQ)
+- **Ports**: Interfaces/contratos que conectam camadas
+
+### Princípios SOLID
+
+- **S**ingle Responsibility: Cada classe/função tem uma única responsabilidade
+- **O**pen/Closed: Aberto para extensão, fechado para modificação
+- **L**iskov Substitution: Subtipos devem ser substituíveis por seus tipos base
+- **I**nterface Segregation: Interfaces específicas ao invés de genéricas
+- **D**ependency Inversion: Depender de abstrações, não de implementações
+
+### Clean Code
+
+- Nomes descritivos e significativos
+- Funções pequenas e focadas
+- Evitar duplicação (DRY)
+- Comentários apenas quando necessário (código auto-explicativo)
+- Tratamento de erros explícito
+
+## 🔒 Type Safety
+
+### TypeScript Strict
+
+- **NUNCA usar `any`** - Sempre tipar explicitamente
+- Usar `unknown` quando o tipo é desconhecido
+- Preferir tipos específicos sobre genéricos amplos
+- Validar dados de entrada com Zod
+- Usar type guards quando necessário
+
+### Exemplo de Anti-pattern (NÃO FAZER):
+
+```typescript
+// ❌ ERRADO
+function processPayment(data: any) {
+  return data.amount * 1.1;
+}
+
+// ✅ CORRETO
+function processPayment(data: PaymentRequest): PaymentResponse {
+  return {
+    amount: data.amount * 1.1,
+    // ...
+  };
+}
+```
+
+## 📁 Estrutura de Diretórios
+
+### Backend (`backend/`)
+
+```
+src/
+├── domain/
+│   ├── entities/          # Entidades de domínio puras
+│   ├── value-objects/     # Value objects
+│   └── repositories/      # Interfaces de repositórios (ports)
+├── application/
+│   ├── use-cases/         # Casos de uso
+│   ├── services/          # Serviços de aplicação
+│   └── dto/               # Data Transfer Objects
+├── infrastructure/
+│   ├── database/          # Implementação Prisma
+│   ├── messaging/         # RabbitMQ
+│   ├── external/          # APIs externas (bancos, gateways)
+│   └── http/              # Express, rotas, middlewares
+└── ports/
+    ├── repositories/      # Interfaces de repositórios
+    └── services/         # Interfaces de serviços externos
+```
+
+### Frontend (`frontend/`)
+
+```
+src/
+├── app/                   # Next.js App Router
+├── components/            # Componentes React
+│   ├── ui/               # Componentes Shadcn
+│   └── features/         # Componentes específicos de features
+├── lib/                   # Utilitários e helpers
+├── hooks/                 # Custom hooks
+├── types/                 # TypeScript types
+└── services/              # API clients
+```
+
+## 🛠️ Tecnologias e Ferramentas
+
+### Backend
+
+- **Runtime**: Node.js com TypeScript
+- **ORM**: Prisma (PostgreSQL)
+- **Mensageria**: RabbitMQ (amqplib)
+- **Validação**: Zod
+- **Framework**: Express
+- **IaC**: SST (Serverless Stack)
+
+### Frontend
+
+- **Framework**: Next.js 16+ (App Router)
+- **UI Library**: React 19+
+- **Styling**: TailwindCSS v4
+- **Components**: Shadcn/ui, Aceternity UI, Magic UI
+- **Type Safety**: TypeScript strict
+
+### Infraestrutura
+
+- **IaC**: SST
+- **Database**: PostgreSQL (via Prisma)
+- **Message Queue**: RabbitMQ
+- **Deployment**: AWS (via SST)
+
+## 💼 Funcionalidades Principais
+
+### Dashboard SaaS (Proprietários)
+
+- Visualização de lucro e receitas
+- Relatórios financeiros detalhados
+- Análise de taxas e comissões
+- Conciliação bancária
+- Controle de split de pagamentos
+
+### Interface Cliente
+
+- Criação de cobranças (Pix, Boleto)
+- Relatórios e extratos
+- Gerenciamento de chaves Pix
+- Gerenciamento de boletos
+- Acompanhamento de taxas
+
+### Fluxo Financeiro
+
+- Recebimento de pagamentos
+- Split de pagamentos automático
+- Repasse para clientes
+- Conciliação bancária automática
+- Controle de taxas e comissões
+
+## 📝 Convenções de Código
+
+### Nomenclatura
+
+- **Classes**: PascalCase (`PaymentService`, `UserRepository`)
+- **Funções/Métodos**: camelCase (`createPayment`, `processRefund`)
+- **Constantes**: UPPER_SNAKE_CASE (`MAX_RETRY_ATTEMPTS`)
+- **Interfaces/Types**: PascalCase com prefixo `I` opcional (`IPayment`, `PaymentRequest`)
+- **Arquivos**: kebab-case (`payment-service.ts`, `user-repository.ts`)
+
+### Estrutura de Arquivos
+
+- Um arquivo por classe/entidade principal
+- Exports nomeados preferidos sobre default exports
+- Barrels (`index.ts`) para facilitar imports
+
+### Tratamento de Erros
+
+- Usar classes de erro customizadas
+- Sempre tipar erros
+- Logs estruturados
+- Não expor detalhes internos em respostas públicas
+
+### Validação
+
+- Validar TODOS os inputs com Zod
+- Validar em múltiplas camadas (DTO, Domain, Application)
+- Mensagens de erro claras e específicas
+
+## 🔄 Mensageria (RabbitMQ)
+
+### Padrões
+
+- Usar exchanges e queues nomeadas
+- Implementar retry logic
+- Dead letter queues para falhas
+- Mensagens tipadas com TypeScript
+- Idempotência nas operações
+
+### Eventos Principais
+
+- `payment.created`
+- `payment.processed`
+- `payment.failed`
+- `split.executed`
+- `reconciliation.completed`
+
+## 🗄️ Banco de Dados (Prisma)
+
+### Convenções
+
+- Migrations versionadas e descritivas
+- Seeds para dados iniciais
+- Indexes em campos de busca frequente
+- Relações bem definidas
+- Soft deletes quando aplicável
+
+### Performance
+
+- Queries otimizadas (evitar N+1)
+- Usar `select` para campos específicos
+- Paginação em listagens
+- Transações para operações críticas
+
+## 🎨 Frontend (React/Next.js)
+
+### Componentes
+
+- Componentes funcionais com hooks
+- Server Components quando possível
+- Client Components apenas quando necessário
+- Props tipadas com TypeScript
+- Evitar prop drilling (usar Context quando necessário)
+
+### Styling
+
+- TailwindCSS para estilização
+- Shadcn/ui para componentes base
+- Aceternity UI e Magic UI para animações/efeitos
+- Design system consistente
+- Responsive design mobile-first
+
+### Estado
+
+- Server State: React Query / SWR
+- Client State: useState / useReducer
+- Global State: Context API (evitar Redux se possível)
+
+## 🧪 Testes
+
+### Estratégia
+
+- Unit tests para lógica de negócio
+- Integration tests para casos de uso
+- E2E tests para fluxos críticos
+- Testes de componentes (React Testing Library)
+
+### Cobertura
+
+- Mínimo 80% em código crítico
+- 100% em regras de negócio complexas
+
+## 🚀 Deploy e DevOps
+
+### SST (Infrastructure as Code)
+
+- Todos os recursos via SST
+- Stacks separados por ambiente
+- Variáveis de ambiente via SST
+- Secrets gerenciados adequadamente
+
+### Ambientes
+
+- `dev`: Desenvolvimento local
+- `staging`: Pré-produção
+- `production`: Produção
+
+## ⚠️ Regras Importantes
+
+1. **NUNCA commitar secrets/credenciais**
+2. **Sempre validar inputs** antes de processar
+3. **Logs estruturados** para debugging
+4. **Documentar decisões complexas** em código
+5. **Revisar código** antes de commitar
+6. **Manter dependências atualizadas** (security)
+7. **Type-safe em TODAS as operações**
+8. **Respeitar a arquitetura hexagonal** - não criar dependências circulares
+9. **Testes para funcionalidades críticas** (pagamentos, repasses)
+10. **Performance**: Otimizar queries e evitar operações síncronas pesadas
+
+## 📚 Recursos e Referências
+
+- [Arquitetura Hexagonal](https://alistair.cockburn.us/hexagonal-architecture/)
+- [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
+- [Clean Code](https://github.com/ryanmcdermott/clean-code-javascript)
+- [Prisma Docs](https://www.prisma.io/docs)
+- [SST Docs](https://docs.sst.dev)
+- [Next.js Docs](https://nextjs.org/docs)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+
+## 🎯 Objetivos do Projeto
+
+1. Gateway de pagamentos robusto e escalável
+2. Dashboard intuitivo para proprietários
+3. Interface clara para clientes
+4. Conciliação bancária automática
+5. Split de pagamentos eficiente
+6. Código limpo, testável e manutenível
+7. Type-safe em toda a aplicação
+8. Arquitetura que facilita evolução
+
+---
+
+**Lembre-se**: Qualidade > Velocidade. Código bem escrito hoje economiza tempo amanhã.
