@@ -51,11 +51,11 @@ export class Reconciliation {
   private _unmatchedTransactions: string[];
   private _totalAmountCents: number;
   private _matchedAmountCents: number;
-  readonly failureReason?: string;
-  readonly processedAt?: Date;
+  private _failureReason?: string;
+  private _processedAt?: Date;
   readonly metadata?: Record<string, unknown>;
   readonly createdAt: Date;
-  readonly updatedAt: Date;
+  private _updatedAt: Date;
 
   constructor(props: ReconciliationProps) {
     this.id = props.id || randomUUID();
@@ -69,11 +69,11 @@ export class Reconciliation {
     this._unmatchedTransactions = props.unmatchedTransactions || [];
     this._totalAmountCents = props.totalAmountCents || 0;
     this._matchedAmountCents = props.matchedAmountCents || 0;
-    this.failureReason = props.failureReason;
-    this.processedAt = props.processedAt;
+    this._failureReason = props.failureReason;
+    this._processedAt = props.processedAt;
     this.metadata = props.metadata;
     this.createdAt = props.createdAt || new Date();
-    this.updatedAt = props.updatedAt || new Date();
+    this._updatedAt = props.updatedAt || new Date();
 
     // Validações de domínio
     if (this.endDate < this.startDate) {
@@ -105,13 +105,25 @@ export class Reconciliation {
     return this._matchedAmountCents;
   }
 
+  get failureReason(): string | undefined {
+    return this._failureReason;
+  }
+
+  get processedAt(): Date | undefined {
+    return this._processedAt;
+  }
+
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
   startProcessing(totalAmountCents: number): void {
     if (this._status !== ReconciliationStatus.PENDING) {
       throw new Error("Only PENDING reconciliations can start processing");
     }
     this._status = ReconciliationStatus.PROCESSING;
     this._totalAmountCents = totalAmountCents;
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._updatedAt = new Date();
   }
 
   addMatch(chargeId: string, amountCents: number, transactionId: string): void {
@@ -125,7 +137,7 @@ export class Reconciliation {
       matchedAt: new Date(),
     });
     this._matchedAmountCents += amountCents;
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._updatedAt = new Date();
   }
 
   addUnmatchedCharge(chargeId: string): void {
@@ -134,7 +146,7 @@ export class Reconciliation {
     }
     if (!this._unmatchedCharges.includes(chargeId)) {
       this._unmatchedCharges.push(chargeId);
-      (this as { updatedAt: Date }).updatedAt = new Date();
+      this._updatedAt = new Date();
     }
   }
 
@@ -144,7 +156,7 @@ export class Reconciliation {
     }
     if (!this._unmatchedTransactions.includes(transactionId)) {
       this._unmatchedTransactions.push(transactionId);
-      (this as { updatedAt: Date }).updatedAt = new Date();
+      this._updatedAt = new Date();
     }
   }
 
@@ -155,8 +167,8 @@ export class Reconciliation {
     
     const hasUnmatched = this._unmatchedCharges.length > 0 || this._unmatchedTransactions.length > 0;
     this._status = hasUnmatched ? ReconciliationStatus.PARTIAL : ReconciliationStatus.COMPLETED;
-    (this as { processedAt?: Date }).processedAt = new Date();
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._processedAt = new Date();
+    this._updatedAt = new Date();
   }
 
   fail(failureReason: string): void {
@@ -164,8 +176,8 @@ export class Reconciliation {
       throw new Error("Only PROCESSING reconciliations can fail");
     }
     this._status = ReconciliationStatus.FAILED;
-    (this as { failureReason?: string }).failureReason = failureReason;
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._failureReason = failureReason;
+    this._updatedAt = new Date();
   }
 
   getMatchRate(): number {

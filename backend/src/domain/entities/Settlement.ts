@@ -31,14 +31,14 @@ export class Settlement {
   readonly amountCents: number;
   readonly currency: string;
   private _status: SettlementStatus;
-  readonly scheduledFor?: Date;
-  readonly processedAt?: Date;
-  readonly bankAccountId?: string;
-  readonly transactionId?: string;
-  readonly failureReason?: string;
+  private _scheduledFor?: Date;
+  private _processedAt?: Date;
+  private _bankAccountId?: string;
+  private _transactionId?: string;
+  private _failureReason?: string;
   readonly metadata?: Record<string, unknown>;
   readonly createdAt: Date;
-  readonly updatedAt: Date;
+  private _updatedAt: Date;
 
   constructor(props: SettlementProps) {
     this.id = props.id || randomUUID();
@@ -46,19 +46,43 @@ export class Settlement {
     this.amountCents = props.amountCents;
     this.currency = props.currency || "BRL";
     this._status = props.status || SettlementStatus.PENDING;
-    this.scheduledFor = props.scheduledFor;
-    this.processedAt = props.processedAt;
-    this.bankAccountId = props.bankAccountId;
-    this.transactionId = props.transactionId;
-    this.failureReason = props.failureReason;
+    this._scheduledFor = props.scheduledFor;
+    this._processedAt = props.processedAt;
+    this._bankAccountId = props.bankAccountId;
+    this._transactionId = props.transactionId;
+    this._failureReason = props.failureReason;
     this.metadata = props.metadata;
     this.createdAt = props.createdAt || new Date();
-    this.updatedAt = props.updatedAt || new Date();
+    this._updatedAt = props.updatedAt || new Date();
 
     // Validações de domínio
     if (this.amountCents <= 0) {
       throw new Error("Settlement amount must be greater than zero");
     }
+  }
+
+  get scheduledFor(): Date | undefined {
+    return this._scheduledFor;
+  }
+
+  get processedAt(): Date | undefined {
+    return this._processedAt;
+  }
+
+  get bankAccountId(): string | undefined {
+    return this._bankAccountId;
+  }
+
+  get transactionId(): string | undefined {
+    return this._transactionId;
+  }
+
+  get failureReason(): string | undefined {
+    return this._failureReason;
+  }
+
+  get updatedAt(): Date {
+    return this._updatedAt;
   }
 
   get status(): SettlementStatus {
@@ -73,9 +97,9 @@ export class Settlement {
       throw new Error("Scheduled date must be in the future");
     }
     this._status = SettlementStatus.SCHEDULED;
-    (this as { scheduledFor?: Date }).scheduledFor = scheduledFor;
-    (this as { bankAccountId?: string }).bankAccountId = bankAccountId;
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._scheduledFor = scheduledFor;
+    this._bankAccountId = bankAccountId;
+    this._updatedAt = new Date();
   }
 
   startProcessing(): void {
@@ -83,7 +107,7 @@ export class Settlement {
       throw new Error("Only SCHEDULED or PENDING settlements can be processed");
     }
     this._status = SettlementStatus.PROCESSING;
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._updatedAt = new Date();
   }
 
   complete(transactionId: string): void {
@@ -91,9 +115,9 @@ export class Settlement {
       throw new Error("Only PROCESSING settlements can be completed");
     }
     this._status = SettlementStatus.COMPLETED;
-    (this as { transactionId?: string }).transactionId = transactionId;
-    (this as { processedAt?: Date }).processedAt = new Date();
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._transactionId = transactionId;
+    this._processedAt = new Date();
+    this._updatedAt = new Date();
   }
 
   fail(failureReason: string): void {
@@ -101,8 +125,8 @@ export class Settlement {
       throw new Error("Only PROCESSING settlements can fail");
     }
     this._status = SettlementStatus.FAILED;
-    (this as { failureReason?: string }).failureReason = failureReason;
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._failureReason = failureReason;
+    this._updatedAt = new Date();
   }
 
   cancel(): void {
@@ -110,7 +134,7 @@ export class Settlement {
       throw new Error("Cannot cancel completed settlement");
     }
     this._status = SettlementStatus.CANCELED;
-    (this as { updatedAt: Date }).updatedAt = new Date();
+    this._updatedAt = new Date();
   }
 
   canBeProcessed(): boolean {
@@ -118,10 +142,10 @@ export class Settlement {
   }
 
   isDue(): boolean {
-    if (!this.scheduledFor) {
+    if (!this._scheduledFor) {
       return this._status === SettlementStatus.PENDING;
     }
-    return new Date() >= this.scheduledFor && this.canBeProcessed();
+    return new Date() >= this._scheduledFor && this.canBeProcessed();
   }
 }
 

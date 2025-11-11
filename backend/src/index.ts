@@ -22,6 +22,8 @@ import { env } from "./config/env";
 import { prisma } from "./infrastructure/database/prismaClient";
 import { setupSwagger } from "./infrastructure/http/swagger";
 import { chargesRouter } from "./infrastructure/http/routes/chargesRoutes";
+import { settlementsRouter } from "./infrastructure/http/routes/settlementsRoutes";
+import { reconciliationsRouter } from "./infrastructure/http/routes/reconciliationsRoutes";
 
 const app = express();
 
@@ -60,6 +62,8 @@ app.get("/healthz", async (_, res) => {
 
 app.use('/auth', authRouter);
 app.use('/charges', chargesRouter);
+app.use('/settlements', settlementsRouter);
+app.use('/reconciliations', reconciliationsRouter);
 // TODO: Register domain routers here (payments, merchants etc.)
 
 // Swagger docs

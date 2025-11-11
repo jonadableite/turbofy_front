@@ -44,7 +44,7 @@ export class PrismaReconciliationRepository implements ReconciliationRepository 
   async findByMerchantId(merchantId: string, status?: string): Promise<Reconciliation[]> {
     const where: Prisma.ReconciliationWhereInput = { merchantId };
     if (status) {
-      where.status = status as ReconciliationStatus;
+      where.status = status as Prisma.ReconciliationStatus;
     }
     const found = await prisma.reconciliation.findMany({
       where,

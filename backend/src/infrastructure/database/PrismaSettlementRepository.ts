@@ -30,7 +30,7 @@ export class PrismaSettlementRepository implements SettlementRepository {
   async findByMerchantId(merchantId: string, status?: string): Promise<Settlement[]> {
     const where: Prisma.SettlementWhereInput = { merchantId };
     if (status) {
-      where.status = status as SettlementStatus;
+      where.status = status as Prisma.SettlementStatus;
     }
     const found = await prisma.settlement.findMany({ where, orderBy: { createdAt: "desc" } });
     return found.map(mapPrismaSettlementToDomain);

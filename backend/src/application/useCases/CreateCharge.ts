@@ -174,7 +174,7 @@ export class CreateCharge {
       persisted = await this.chargeRepository.update(persisted);
     }
 
-    // 6. Publish event (structured, idempotent)
+    // 10. Publish event (structured, idempotent)
     await this.messaging.publish({
       id: randomUUID(),
       type: "charge.created",
@@ -190,10 +190,36 @@ export class CreateCharge {
         currency: persisted.currency,
         status: persisted.status,
         method: persisted.method,
+        splitsCount: persistedSplits.length,
+        feesCount: persistedFees.length,
         createdAt: persisted.createdAt.toISOString(),
       },
     });
 
-    return { charge: persisted };
+    // 11. Publish split events if any
+    for (const split of persistedSplits) {
+      await this.messaging.publish({
+        id: randomUUID(),
+        type: "charge.split.created",
+        timestamp: new Date().toISOString(),
+        version: "v1",
+        traceId: input.idempotencyKey,
+        idempotencyKey: input.idempotencyKey,
+        routingKey: "turbofy.payments.charge.split.created",
+        payload: {
+          id: split.id,
+          chargeId: split.chargeId,
+          merchantId: split.merchantId,
+          amountCents: split.amountCents ?? split.computeAmountForTotal(persisted.amountCents),
+          percentage: split.percentage,
+        },
+      });
+    }
+
+    return {
+      charge: persisted,
+      splits: persistedSplits.length > 0 ? persistedSplits : undefined,
+      fees: persistedFees.length > 0 ? persistedFees : undefined,
+    };
   }
 }

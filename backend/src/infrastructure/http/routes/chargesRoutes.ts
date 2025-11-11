@@ -35,7 +35,7 @@ chargesRouter.post("/", async (req: Request, res: Response) => {
       ? (parsed.method === "PIX" ? ChargeMethod.PIX : ChargeMethod.BOLETO)
       : undefined;
 
-    const { charge } = await useCase.execute({
+    const result = await useCase.execute({
       idempotencyKey: req.header("X-Idempotency-Key") as string,
       merchantId: parsed.merchantId,
       amountCents: parsed.amountCents,
@@ -45,9 +45,13 @@ chargesRouter.post("/", async (req: Request, res: Response) => {
       expiresAt: parsed.expiresAt ? new Date(parsed.expiresAt) : undefined,
       externalRef: parsed.externalRef,
       metadata: parsed.metadata,
+      splits: parsed.splits,
+      fees: parsed.fees,
     });
 
-    const response = CreateChargeResponseSchema.parse({
+    const { charge, splits, fees } = result;
+
+    const responseData: Record<string, unknown> = {
       id: charge.id,
       merchantId: charge.merchantId,
       amountCents: charge.amountCents,
@@ -63,7 +67,28 @@ chargesRouter.post("/", async (req: Request, res: Response) => {
       boleto: charge.boletoUrl ? { boletoUrl: charge.boletoUrl, expiresAt: (charge.expiresAt ?? new Date()).toISOString() } : undefined,
       createdAt: charge.createdAt.toISOString(),
       updatedAt: charge.updatedAt.toISOString(),
-    });
+    };
+
+    // Add splits and fees if present
+    if (splits && splits.length > 0) {
+      responseData.splits = splits.map((split) => ({
+        id: split.id,
+        merchantId: split.merchantId,
+        amountCents: split.amountCents ?? split.computeAmountForTotal(charge.amountCents),
+        percentage: split.percentage,
+      }));
+    }
+
+    if (fees && fees.length > 0) {
+      responseData.fees = fees.map((fee) => ({
+        id: fee.id,
+        type: fee.type,
+        amountCents: fee.amountCents,
+      }));
+    }
+
+    // Validate response with schema (now supports splits and fees)
+    const response = CreateChargeResponseSchema.parse(responseData);
 
     res.status(201).json(response);
   } catch (err) {

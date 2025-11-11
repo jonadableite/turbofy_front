@@ -9,8 +9,7 @@ import { Charge } from "../../domain/entities/Charge";
 import { ChargeSplit } from "../../domain/entities/ChargeSplit";
 import { Fee } from "../../domain/entities/Fee";
 import { ChargeRepository } from "../../ports/ChargeRepository";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prismaClient";
 
 function mapPrismaChargeToDomain(model: any): Charge {
   return new Charge({

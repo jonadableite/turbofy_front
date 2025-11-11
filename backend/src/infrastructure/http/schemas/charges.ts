@@ -4,6 +4,22 @@ export const ChargeMethodSchema = z.enum(["PIX", "BOLETO"]);
 
 export const ChargeStatusSchema = z.enum(["PENDING", "PAID", "EXPIRED", "CANCELED"]);
 
+const SplitSchema = z.object({
+  merchantId: z.string().uuid({ message: "merchantId must be a valid UUID" }),
+  amountCents: z.number().int().positive().optional(),
+  percentage: z.number().min(0).max(100).optional(),
+}).refine(
+  (data) => data.amountCents !== undefined || data.percentage !== undefined,
+  {
+    message: "Either amountCents or percentage must be provided",
+  }
+);
+
+const FeeSchema = z.object({
+  type: z.string().min(1, "Fee type is required"),
+  amountCents: z.number().int().nonnegative("amountCents must be non-negative"),
+});
+
 export const CreateChargeRequestSchema = z.object({
   merchantId: z.string().uuid({ message: "merchantId inválido (UUID v4)" }),
   amountCents: z.number().int().positive(),
@@ -14,6 +30,8 @@ export const CreateChargeRequestSchema = z.object({
   idempotencyKey: z.string().min(8),
   externalRef: z.string().max(128).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
+  splits: z.array(SplitSchema).optional(),
+  fees: z.array(FeeSchema).optional(),
 });
 
 export const PixPayloadSchema = z.object({
@@ -41,6 +59,17 @@ export const CreateChargeResponseSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).nullable().optional(),
   pix: PixPayloadSchema.optional(),
   boleto: BoletoPayloadSchema.optional(),
+  splits: z.array(z.object({
+    id: z.string().uuid(),
+    merchantId: z.string().uuid(),
+    amountCents: z.number().int(),
+    percentage: z.number().optional(),
+  })).optional(),
+  fees: z.array(z.object({
+    id: z.string().uuid(),
+    type: z.string(),
+    amountCents: z.number().int(),
+  })).optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

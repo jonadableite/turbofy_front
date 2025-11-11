@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml tsconfig.json ./
@@ -8,15 +8,15 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm prisma:generate
 RUN pnpm build
 
-FROM node:20-alpine AS runner
+FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8080
-RUN corepack enable && apk add --no-cache curl
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod
+COPY package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY docker/healthcheck.js ./healthcheck.js
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -f http://localhost:8080/healthz || exit 1
-CMD ["node", "dist/index.js"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["node", "/app/healthcheck.js"]
+CMD ["node", "/app/dist/index.js"]
