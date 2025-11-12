@@ -4,16 +4,35 @@
  */
 
 import { Router, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { generateCsrfToken } from '../../security/csrf';
 import { logger } from '../../logger';
 
 const apiRouter = Router();
 
+// Rate limiter para endpoints da API - mais permissivo em desenvolvimento
+const isDevelopment = process.env.NODE_ENV === 'development';
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: isDevelopment ? 100 : 20, // 100 req/min em dev, 20 em produção
+  message: 'Too many requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Skip rate limiting para localhost em desenvolvimento
+  skip: (req) => {
+    if (isDevelopment) {
+      const ip = req.ip || req.socket.remoteAddress || '';
+      return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+    }
+    return false;
+  },
+});
+
 /**
  * GET /api/auth/csrf
  * Gera e retorna um token CSRF para proteção contra ataques CSRF
  */
-apiRouter.get('/auth/csrf', (req: Request, res: Response) => {
+apiRouter.get('/auth/csrf', apiLimiter, (req: Request, res: Response) => {
   try {
     const csrfToken = generateCsrfToken();
     

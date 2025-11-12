@@ -19,7 +19,6 @@ cp ENV_EXAMPLE.md .env.local
 
 # Editar com suas chaves
 NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6Lc... # Obter em https://www.google.com/recaptcha/admin
 ```
 
 ### 3. Executar
@@ -96,10 +95,6 @@ pnpm dev
 3. No 5º erro, o botão deve bloquear por 30 segundos
 4. Contador regressivo deve aparecer: "Aguarde 30s"
 
-### reCAPTCHA
-- reCAPTCHA v3 roda automaticamente em background
-- Você verá o badge do reCAPTCHA no canto inferior direito
-- Não há desafio visual (v3 é invisível)
 
 ## 📱 Testar Responsividade
 
@@ -142,8 +137,6 @@ pnpm dev
 
 ## 🐛 Troubleshooting
 
-### Erro: "reCAPTCHA not ready yet"
-**Solução:** Adicione a chave `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` no `.env.local`
 
 ### Erro: "Failed to fetch CSRF token"
 **Solução:** Isso é esperado! O endpoint `/api/auth/csrf` ainda precisa ser implementado no backend. O sistema continua funcionando sem ele por enquanto.
@@ -220,9 +213,7 @@ Depois de testar:
 ---
 
 **Pronto para produção?** Não esqueça de:
-- ✅ Configurar reCAPTCHA v3 em produção
 - ✅ Usar HTTPS
 - ✅ Configurar CORS adequadamente
 - ✅ Implementar rate limiting no backend
-- ✅ Validar reCAPTCHA no servidor
 

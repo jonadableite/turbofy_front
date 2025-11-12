@@ -1,9 +1,9 @@
 "use client";
 
 import { ReactNode } from "react";
-import { ThemeToggle } from "./ThemeToggle";
 import Link from "next/link";
 import { ArrowLeft, LifeBuoy, Zap } from "lucide-react";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -130,7 +130,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
               Voltar
             </Link>
             <div className="flex items-center gap-4">
-              <ThemeToggle />
+              <AnimatedThemeToggler />
               <Link
                 href="/suporte"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 group"

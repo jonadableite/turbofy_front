@@ -1,111 +1,77 @@
-/**
- * API client com suporte a CSRF tokens e credentials
- */
+import axios, { AxiosError } from "axios";
+import { getAccessToken, getCsrfToken, clearTokens } from "./auth";
 
-export interface ApiError {
-  message: string;
-  issues?: Array<{ path: string[]; message: string }>;
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export class ApiException extends Error {
   constructor(
     message: string,
-    public readonly status: number,
-    public readonly issues?: Array<{ path: string[]; message: string }>
+    public statusCode?: number,
+    public code?: string
   ) {
     super(message);
     this.name = "ApiException";
   }
 }
 
-let csrfToken: string | null = null;
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true, // Para cookies HttpOnly
+});
 
-/**
- * Busca o CSRF token do backend
- */
-async function fetchCsrfToken(): Promise<string> {
-  if (csrfToken) return csrfToken;
+// Interceptor para adicionar token de autenticação e CSRF
+api.interceptors.request.use(
+  (config) => {
+    // Adicionar token de acesso se existir
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-  try {
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-      }/api/auth/csrf`,
-      {
-        credentials: "include",
+    // Adicionar token CSRF para requisições mutáveis
+    const csrfToken = getCsrfToken();
+    if (csrfToken && (config.method === "post" || config.method === "put" || config.method === "patch" || config.method === "delete")) {
+      config.headers["X-CSRF-Token"] = csrfToken;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para tratar erros
+api.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError<{ error?: { code?: string; message?: string } }>) => {
+    if (error.response?.status === 401) {
+      // Token inválido ou expirado
+      clearTokens();
+      
+      // Redirecionar para login se não estiver em página de autenticação
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname;
+        const isAuthPage = currentPath === "/login" || currentPath === "/register" || currentPath === "/forgot" || currentPath === "/forgot-password";
+        
+        if (!isAuthPage) {
+          window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+        }
       }
+    }
+
+    // Criar exceção customizada
+    const apiError = new ApiException(
+      error.response?.data?.error?.message || error.message || "Erro na requisição",
+      error.response?.status,
+      error.response?.data?.error?.code
     );
 
-    if (!response.ok) {
-      console.warn("Failed to fetch CSRF token, continuing without it");
-      return "";
-    }
-
-    const data = await response.json();
-    csrfToken = data.csrfToken || "";
-    return csrfToken || "";
-  } catch (error) {
-    console.warn("Error fetching CSRF token:", error);
-    return "";
+    return Promise.reject(apiError);
   }
-}
+);
 
-/**
- * Cliente API type-safe com suporte a CSRF e HttpOnly cookies
- */
-export async function api<T = unknown>(
-  url: string,
-  options: RequestInit = {}
-): Promise<T> {
-  // Buscar CSRF token se for método mutável
-  const needsCsrf = ["POST", "PUT", "PATCH", "DELETE"].includes(
-    options.method?.toUpperCase() || "GET"
-  );
-
-  const csrf = needsCsrf ? await fetchCsrfToken() : "";
-
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...(csrf && { "X-CSRF-Token": csrf }),
-    ...(options.headers || {}),
-  };
-
-  const fullUrl = url.startsWith("http")
-    ? url
-    : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}${url}`;
-
-  const response = await fetch(fullUrl, {
-    ...options,
-    headers,
-    credentials: "include", // Necessário para HttpOnly cookies
-  });
-
-  if (!response.ok) {
-    let errorMessage = "Erro inesperado";
-    let errorIssues: Array<{ path: string[]; message: string }> | undefined;
-
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.error || errorData.message || errorMessage;
-      errorIssues = errorData.issues;
-    } catch {
-      // Se não conseguir parsear JSON, usar mensagem padrão
-    }
-
-    throw new ApiException(errorMessage, response.status, errorIssues);
-  }
-
-  // Se for 204 No Content, não tentar parsear JSON
-  if (response.status === 204) {
-    return {} as T;
-  }
-
-  return response.json();
-}
-
-/**
- * Invalida o CSRF token (útil após logout)
- */
-export function invalidateCsrfToken(): void {
-  csrfToken = null;
-}
+export default api;

@@ -17,7 +17,14 @@ export const registerSchema = z.object({
   phone: z.string().optional(),
 });
 
-export const loginSchema = registerSchema; // same shape
+// Login deve aceitar apenas email e senha
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().regex(
+    passwordRegex,
+    'Senha deve conter 8+ chars, maiúscula, minúscula, número e símbolo'
+  ),
+});
 
 export class AuthService {
   private static hashPassword(password: string) {

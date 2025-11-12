@@ -13,8 +13,9 @@ import { FormInput } from "@/components/auth/FormInput";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { AceternityButton } from "@/components/auth/AceternityButton";
 import { registerSchema, type RegisterInput } from "@/lib/validation";
-import { api, ApiException } from "@/lib/api";
-import { useRecaptcha } from "@/hooks/useRecaptcha";
+import api from "@/lib/api";
+import axios, { AxiosError } from "axios";
+
 
 interface RegisterResponse {
   accessToken: string;
@@ -24,15 +25,13 @@ interface RegisterResponse {
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { executeRecaptcha, isReady } = useRecaptcha();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
@@ -42,39 +41,33 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterInput) => {
     try {
-      setIsSubmitting(true);
       setError("");
 
-      // Execute reCAPTCHA
-      const recaptchaToken = await executeRecaptcha("register");
-
-      // Chamada à API (backend espera: email, password, document, phone?)
-      await api<RegisterResponse>("/auth/register", {
-        method: "POST",
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          document: data.document,
-          phone: data.phone,
-          recaptchaToken,
-        }),
+      await api.post<RegisterResponse>("/auth/register", {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        document: data.document,
+        phone: data.phone,
       });
 
       // Redirect to dashboard on success
       router.push("/dashboard");
     } catch (err) {
-      if (err instanceof ApiException) {
-        // Se houver issues do Zod, mostrar a primeira
-        if (err.issues && err.issues.length > 0) {
-          setError(err.issues[0].message);
+      if (axios.isAxiosError(err)) {
+        const axiosErr = err as AxiosError<{ message?: string }>;
+        if (!axiosErr.response) {
+          setError("Falha de conexão com a API. Verifique o backend e tente novamente.");
+        } else if (axiosErr.response.data?.message) {
+          setError(axiosErr.response.data.message);
         } else {
-          setError(err.message);
+          setError("Erro ao criar conta. Tente novamente.");
         }
       } else {
         setError("Erro ao criar conta. Tente novamente.");
       }
     } finally {
-      setIsSubmitting(false);
+      /* Nada a fazer – react-hook-form controla isSubmitting */
     }
   };
 
@@ -94,6 +87,16 @@ export default function RegisterPage() {
             <p className="text-sm text-destructive">{error}</p>
           </motion.div>
         )}
+
+        {/* Nome completo */}
+        <FormInput
+          {...register("name")}
+          label="Nome completo"
+          type="text"
+          placeholder="Seu nome"
+          autoComplete="name"
+          error={errors.name?.message}
+        />
 
         {/* Email */}
         <FormInput
@@ -156,18 +159,20 @@ export default function RegisterPage() {
         {/* Submit button - Estilo Aceternity */}
         <AceternityButton
           type="submit"
-          disabled={!isValid || isSubmitting || !isReady}
+          aria-label={isSubmitting ? "Criando conta" : "Criar conta"}
+          disabled={!isValid || isSubmitting}
           className="flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Criando conta...
+              Criando conta
             </>
           ) : (
             "Criar conta →"
           )}
         </AceternityButton>
+
 
         {/* Login link */}
         <p className="text-center text-sm text-muted-foreground mt-6">

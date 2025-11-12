@@ -22,8 +22,7 @@ Gera um token de reset de senha e envia email com link para redefinição.
 **Body:**
 ```json
 {
-  "email": "user@example.com",
-  "recaptchaToken": "..." // Opcional
+  "email": "user@example.com"
 }
 ```
 
@@ -44,14 +43,13 @@ Gera um token de reset de senha e envia email com link para redefinição.
 ---
 
 ### 3. **POST /auth/login** (Atualizado)
-Login com suporte a HttpOnly cookies e validação reCAPTCHA.
+Login com suporte a HttpOnly cookies.
 
 **Body:**
 ```json
 {
   "email": "user@example.com",
   "password": "senha123",
-  "recaptchaToken": "..." // Opcional
 }
 ```
 
@@ -71,7 +69,7 @@ Login com suporte a HttpOnly cookies e validação reCAPTCHA.
 ---
 
 ### 4. **POST /auth/register** (Atualizado)
-Registro com suporte a HttpOnly cookies e validação reCAPTCHA.
+Registro com suporte a HttpOnly cookies.
 
 **Body:**
 ```json
@@ -79,8 +77,7 @@ Registro com suporte a HttpOnly cookies e validação reCAPTCHA.
   "email": "user@example.com",
   "password": "Senha123!@#",
   "document": "12345678901",
-  "phone": "11999999999", // Opcional
-  "recaptchaToken": "..." // Opcional
+  "phone": "11999999999" // Opcional
 }
 ```
 
@@ -113,11 +110,7 @@ Registro com suporte a HttpOnly cookies e validação reCAPTCHA.
 - ✅ `sameSite: 'strict'` para proteção CSRF
 - ✅ Tokens ainda retornados no JSON para compatibilidade
 
-### reCAPTCHA v3
-- ✅ Validação no servidor via Google API
-- ✅ Score mínimo: 0.5 (configurável)
-- ✅ Opcional (não bloqueia se não fornecido)
-- ✅ Logs de tentativas suspeitas
+<!-- reCAPTCHA removido do backend -->
 
 ### Rate Limiting
 - ✅ 10 requisições / 10 minutos por IP (auth endpoints)
@@ -130,10 +123,7 @@ Registro com suporte a HttpOnly cookies e validação reCAPTCHA.
 
 ### Serviços de Segurança
 
-1. **`src/infrastructure/security/recaptcha.ts`**
-   - Validação de tokens reCAPTCHA v3
-   - Verificação de score mínimo
-   - Tratamento de erros
+<!-- Arquivo recaptcha.ts removido: reCAPTCHA não utilizado -->
 
 2. **`src/infrastructure/security/csrf.ts`**
    - Geração de tokens CSRF
@@ -167,8 +157,6 @@ Registro com suporte a HttpOnly cookies e validação reCAPTCHA.
 Adicione ao `.env`:
 
 ```bash
-# Google reCAPTCHA v3 Secret Key
-RECAPTCHA_SECRET_KEY=6Lc... # Obter em https://www.google.com/recaptcha/admin
 
 # URL do Frontend (para links de email)
 FRONTEND_URL=http://localhost:3001
@@ -243,7 +231,6 @@ curl -X POST http://localhost:3000/auth/forgot-password \
 Os seguintes eventos são logados:
 
 - ✅ Geração de token CSRF
-- ✅ Validação reCAPTCHA (sucesso/falha)
 - ✅ Geração de token de reset
 - ✅ Envio de email de reset
 - ✅ Erros de validação

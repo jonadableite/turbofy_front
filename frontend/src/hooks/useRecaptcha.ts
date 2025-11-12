@@ -26,8 +26,13 @@ export function useRecaptcha(): UseRecaptchaReturn {
   }, [executeRecaptchaLib]);
 
   const executeRecaptcha = async (action: string): Promise<string> => {
+    // Se provider não estiver pronto ou ausente, não bloquear fluxo em dev
     if (!executeRecaptchaLib) {
-      console.warn("reCAPTCHA not ready yet");
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("reCAPTCHA indisponível em desenvolvimento, seguindo sem token");
+        return "";
+      }
+      console.warn("reCAPTCHA não está pronto");
       return "";
     }
 
@@ -35,7 +40,12 @@ export function useRecaptcha(): UseRecaptchaReturn {
       const token = await executeRecaptchaLib(action);
       return token;
     } catch (error) {
-      console.error("Error executing reCAPTCHA:", error);
+      // Em desenvolvimento, manter aviso silencioso para evitar poluição de logs
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Falha ao executar reCAPTCHA (dev):", error);
+        return "";
+      }
+      // Em produção, ainda não bloquear cadastramento se reCAPTCHA falhar
       return "";
     }
   };

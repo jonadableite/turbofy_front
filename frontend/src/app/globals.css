@@ -69,7 +69,7 @@
 
   --radius: 0.625rem;
 
-  --background: 0 0% 100%;
+  --background: 140 8% 78.6%; /* #c4cdc7 */
   --foreground: 0 0% 3.9%;
 
   --chart-1: oklch(0.646 0.222 41.116);
@@ -163,4 +163,11 @@ body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+}
+
+/* View Transitions para Animated Theme Toggler */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }

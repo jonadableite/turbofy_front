@@ -12,10 +12,10 @@ import { FormInput } from "@/components/auth/FormInput";
 import { AceternityButton } from "@/components/auth/AceternityButton";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validation";
 import { api, ApiException } from "@/lib/api";
-import { useRecaptcha } from "@/hooks/useRecaptcha";
+// reCAPTCHA removido
 
 export default function ForgotPasswordPage() {
-  const { executeRecaptcha, isReady } = useRecaptcha();
+  // reCAPTCHA removido
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState(false);
@@ -35,18 +35,9 @@ export default function ForgotPasswordPage() {
       setError("");
       setSuccess(false);
 
-      // Execute reCAPTCHA
-      const recaptchaToken = await executeRecaptcha("forgot_password");
-
       // Chamada à API
-      // Nota: Este endpoint ainda não existe no backend
-      // Quando implementado, deve enviar um email com link de reset
-      await api("/auth/forgot-password", {
-        method: "POST",
-        body: JSON.stringify({
-          ...data,
-          recaptchaToken,
-        }),
+      await api.post("/auth/forgot-password", {
+        email: data.email,
       });
 
       setSuccess(true);
@@ -154,7 +145,7 @@ export default function ForgotPasswordPage() {
         {/* Submit button - Estilo Aceternity */}
         <AceternityButton
           type="submit"
-          disabled={!isValid || isSubmitting || !isReady}
+          disabled={!isValid || isSubmitting}
           className="flex items-center justify-center gap-2"
         >
           {isSubmitting ? (

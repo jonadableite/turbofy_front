@@ -55,6 +55,10 @@ export type LoginInput = z.infer<typeof loginSchema>;
  */
 export const registerSchema = z
   .object({
+    name: z
+      .string()
+      .min(1, "Nome é obrigatório")
+      .max(120, "Nome muito longo"),
     email: z
       .string()
       .min(1, "Email é obrigatório")

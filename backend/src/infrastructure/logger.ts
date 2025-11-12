@@ -1,9 +1,12 @@
 import pino from 'pino';
 
-const transport = process.env.NODE_ENV !== 'production' 
-  ? { 
-      target: 'pino-pretty', 
-      options: { 
+// Atenção: opções do transport são enviadas ao worker thread (thread-stream).
+// Funções dentro das opções (ex.: customPrettifiers) causam DataCloneError.
+// Mantemos apenas valores simples para compatibilidade.
+const transport = process.env.NODE_ENV !== 'production'
+  ? {
+      target: 'pino-pretty',
+      options: {
         colorize: true,
         translateTime: 'SYS:HH:MM:ss',
         ignore: 'pid,hostname',
@@ -12,24 +15,9 @@ const transport = process.env.NODE_ENV !== 'production'
         errorLikeObjectKeys: ['err', 'error'],
         singleLine: false,
         levelFirst: true,
-        // Evitar problemas de encoding com emojis
         hideObject: false,
-        // Usar símbolos ASCII ao invés de emojis
-        customPrettifiers: {
-          level: (logLevel: string) => {
-            const levels: Record<string, string> = {
-              '10': '[TRACE]',
-              '20': '[DEBUG]',
-              '30': '[INFO] ',
-              '40': '[WARN] ',
-              '50': '[ERROR]',
-              '60': '[FATAL]',
-            };
-            return levels[logLevel] || `[${logLevel}]`;
-          },
-        },
-      } 
-    } 
+      },
+    }
   : undefined;
 
 export const logger = pino({

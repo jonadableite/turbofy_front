@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -13,21 +13,17 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FormInput } from "@/components/auth/FormInput";
 import { AceternityButton } from "@/components/auth/AceternityButton";
 import { loginSchema, type LoginInput } from "@/lib/validation";
-import { api, ApiException } from "@/lib/api";
-import { useRecaptcha } from "@/hooks/useRecaptcha";
-
-interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}
+import { useAuth } from "@/contexts/auth-context";
+// reCAPTCHA removido
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 30000; // 30 segundos
 
 export default function LoginPage() {
   const router = useRouter();
-  const { executeRecaptcha, isReady } = useRecaptcha();
+  const searchParams = useSearchParams();
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
+  // reCAPTCHA removido
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
   const [attempts, setAttempts] = useState(0);
@@ -43,18 +39,24 @@ export default function LoginPage() {
     mode: "onChange",
   });
 
+  // Redirecionar se já autenticado
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      const redirect = searchParams.get("redirect") || "/dashboard";
+      router.push(redirect);
+    }
+  }, [authLoading, isAuthenticated, router, searchParams]);
+
   // Lockout timer countdown
   React.useEffect(() => {
     if (isLocked && lockoutTimer > 0) {
       const interval = setInterval(() => {
         setLockoutTimer((prev) => {
-          if (prev <= 1) {
+          if (prev <= 1000) {
             setIsLocked(false);
-            setAttempts(0);
-            clearInterval(interval);
             return 0;
           }
-          return prev - 1;
+          return prev - 1000;
         });
       }, 1000);
 
@@ -63,103 +65,89 @@ export default function LoginPage() {
   }, [isLocked, lockoutTimer]);
 
   const onSubmit = async (data: LoginInput) => {
-    if (isLocked) return;
+    if (isLocked) {
+      setError(`Conta bloqueada. Tente novamente em ${Math.ceil(lockoutTimer / 1000)} segundos.`);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError("");
 
     try {
-      setIsSubmitting(true);
-      setError("");
-
-      // Execute reCAPTCHA
-      const recaptchaToken = await executeRecaptcha("login");
-
-      // Chamada à API
-      const response = await api<LoginResponse>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({
-          ...data,
-          recaptchaToken,
-        }),
-      });
+      await login(data.email, data.password);
 
       // Reset attempts on success
       setAttempts(0);
+    } catch (err: unknown) {
+      const apiError = err as { response?: { data?: { error?: { message?: string; code?: string } } } };
+      const errorMessage = apiError.response?.data?.error?.message || "Erro ao fazer login. Tente novamente.";
 
-      // Redirect to dashboard
-      router.push("/dashboard");
-    } catch (err) {
-      // Increment attempts
+      setError(errorMessage);
+
+      // Incrementar tentativas
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
 
+      // Bloquear após muitas tentativas
       if (newAttempts >= MAX_ATTEMPTS) {
         setIsLocked(true);
-        setLockoutTimer(30);
-        setError(
-          `Muitas tentativas de login. Aguarde ${30} segundos antes de tentar novamente.`
-        );
-      } else {
-        if (err instanceof ApiException) {
-          setError(err.message);
-        } else {
-          setError("Erro ao fazer login. Tente novamente.");
-        }
+        setLockoutTimer(LOCKOUT_DURATION);
+        setError("Muitas tentativas falharam. Sua conta foi temporariamente bloqueada.");
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <AuthLayout
-      title="Bem-vindo de volta"
-      subtitle="Entre na sua conta para continuar"
-    >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Error message */}
-        {error && (
-          <motion.div
-            className="p-3 rounded-md bg-destructive/10 border border-destructive/20"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <p className="text-sm text-destructive">{error}</p>
-          </motion.div>
-        )}
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-        {/* Email */}
+  if (isAuthenticated) {
+    return null; // Redirecionamento em andamento
+  }
+
+  return (
+    <AuthLayout title="Bem-vindo de volta" subtitle="Entre na sua conta Turbofy">
+      {error && (
+        <div className="mb-6 rounded-md bg-destructive/10 border border-destructive/20 p-3">
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+
+      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <FormInput
-          {...register("email")}
+          id="email"
           label="Email"
           type="email"
           placeholder="seu@email.com"
-          autoComplete="email"
           error={errors.email?.message}
-          disabled={isLocked}
+          {...register("email")}
+          disabled={isSubmitting || isLocked}
         />
 
-        {/* Password */}
         <FormInput
-          {...register("password")}
+          id="password"
           label="Senha"
           type="password"
           placeholder="••••••••"
-          autoComplete="current-password"
           error={errors.password?.message}
-          disabled={isLocked}
+          {...register("password")}
+          disabled={isSubmitting || isLocked}
         />
 
-        {/* Remember me and Forgot password */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <input
               id="remember"
               type="checkbox"
-              className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-ring focus:ring-offset-0"
+              className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary focus:ring-offset-0"
             />
-            <label
-              htmlFor="remember"
-              className="text-sm text-foreground cursor-pointer"
-            >
+            <label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">
               Lembrar de mim
             </label>
           </div>
@@ -171,31 +159,24 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Submit button - Estilo Aceternity */}
         <AceternityButton
           type="submit"
-          disabled={!isValid || isSubmitting || isLocked || !isReady}
-          className="flex items-center justify-center gap-2"
+          disabled={isSubmitting || isLocked || !isValid}
+          className="w-full"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Entrando...
             </>
-          ) : isLocked ? (
-            `Aguarde ${lockoutTimer}s`
           ) : (
             "Entrar →"
           )}
         </AceternityButton>
 
-        {/* Register link */}
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        <p className="text-center text-sm text-muted-foreground">
           Não tem uma conta?{" "}
-          <Link
-            href="/register"
-            className="text-primary hover:text-primary/80 font-medium transition-colors"
-          >
+          <Link href="/register" className="text-primary hover:text-primary/80 font-medium transition-colors">
             Criar conta
           </Link>
         </p>
@@ -203,4 +184,3 @@ export default function LoginPage() {
     </AuthLayout>
   );
 }
-

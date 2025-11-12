@@ -8,26 +8,50 @@ import { prisma } from '../../database/prismaClient';
 import { EmailService } from '../../email/EmailService';
 import { logger } from '../../logger';
 import { trace } from '@opentelemetry/api';
-import { verifyRecaptcha } from '../../security/recaptcha';
+// reCAPTCHA removido
 import { generateCsrfToken } from '../../security/csrf';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const authRouter = Router();
 const authService = new AuthService();
 const emailService = new EmailService();
 const tracer = trace.getTracer('turbofy-auth');
 
+// Rate limiter: mais permissivo em desenvolvimento
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 // rate limiter: 10 requests / 10 minutes per IP for auth endpoints
 const authLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 10,
+  windowMs: 10 * 60 * 1000, // 10 minutos
+  max: isDevelopment ? 100 : 10, // 100 req/10min em dev, 10 em produção
   message: 'Too many auth attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Skip rate limiting para localhost em desenvolvimento
+  skip: (req) => {
+    if (isDevelopment) {
+      const ip = req.ip || req.socket.remoteAddress || '';
+      return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+    }
+    return false;
+  },
 });
 
-// MFA: stricter request rate limiting
+// MFA: stricter request rate limiting - mais permissivo em desenvolvimento
 const mfaLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 5,
+  windowMs: 10 * 60 * 1000, // 10 minutos
+  max: isDevelopment ? 50 : 5, // 50 req/10min em dev, 5 em produção
   message: 'Too many MFA requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Skip rate limiting para localhost em desenvolvimento
+  skip: (req) => {
+    if (isDevelopment) {
+      const ip = req.ip || req.socket.remoteAddress || '';
+      return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+    }
+    return false;
+  },
 });
 
 const mfaRequestSchema = z.object({
@@ -39,6 +63,22 @@ const mfaVerifySchema = z.object({
   otp: z.string().regex(/^\d{6}$/, 'OTP must be 6 digits'),
 });
 
+// Rate limiter mais permissivo para /auth/me (usado frequentemente)
+const meLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: isDevelopment ? 100 : 30, // 100 req/min em dev, 30 em produção
+  message: 'Too many requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    if (isDevelopment) {
+      const ip = req.ip || req.socket.remoteAddress || '';
+      return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+    }
+    return false;
+  },
+});
+
 // Brute-force helpers (duplicated from AuthService logic for route-level control)
 async function checkLock(email: string, ip: string) {
   const now = new Date();
@@ -48,43 +88,65 @@ async function checkLock(email: string, ip: string) {
   }
 }
 
-async function recordFailure(email: string, ip: string) {
-  const windowMs = 15 * 60 * 1000;
-  const now = new Date();
-  const attempt = await prisma.authAttempt.findFirst({ where: { email, ip } });
-  if (!attempt) {
-    await prisma.authAttempt.create({ data: { email, ip, count: 1, windowStart: now } });
-    return;
-  }
-  const windowStart = new Date(attempt.windowStart);
-  if (now.getTime() - windowStart.getTime() > windowMs) {
-    await prisma.authAttempt.updateMany({ where: { email, ip }, data: { count: 1, windowStart: now, lockedUntil: null } });
-    return;
-  }
-  const newCount = attempt.count + 1;
-  const lockThreshold = 5;
-  const lockMs = 15 * 60 * 1000;
-  await prisma.authAttempt.updateMany({
-    where: { email, ip },
-    data: { count: newCount, ...(newCount >= lockThreshold ? { lockedUntil: new Date(now.getTime() + lockMs) } : {}) },
-  });
-}
-
-async function recordSuccess(email: string, ip: string) {
-  await prisma.authAttempt.deleteMany({ where: { email, ip } }).catch(() => {});
-}
-
-authRouter.post('/register', authLimiter, async (req: Request, res: Response) => {
-  const ip = req.ip || 'unknown';
+// GET /auth/me - Obter dados do usuário autenticado
+authRouter.get('/me', meLimiter, authMiddleware, async (req: Request, res: Response) => {
   try {
-    // Validar reCAPTCHA se fornecido
-    const { recaptchaToken, ...inputData } = req.body as { recaptchaToken?: string } & z.infer<typeof registerSchema>;
-    if (recaptchaToken) {
-      const isValid = await verifyRecaptcha(recaptchaToken, ip);
-      if (!isValid) {
-        return res.status(400).json({ error: 'reCAPTCHA validation failed' });
-      }
+    if (!req.user) {
+      return res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Usuário não autenticado' } });
     }
+
+    // Buscar dados completos do usuário
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        roles: true,
+        document: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: { code: 'USER_NOT_FOUND', message: 'Usuário não encontrado' } });
+    }
+
+    res.json({
+      id: user.id,
+      email: user.email,
+      roles: user.roles,
+      name: user.email.split('@')[0], // Fallback para nome
+      document: user.document,
+      phone: user.phone,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+  } catch (err) {
+    logger.error({ err }, 'Erro ao buscar dados do usuário');
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
+  }
+});
+
+// GET /api/auth/csrf - Gerar token CSRF
+authRouter.get('/csrf', async (req: Request, res: Response) => {
+  try {
+    const csrfToken = generateCsrfToken();
+    res.json({ csrfToken });
+  } catch (err) {
+    logger.error({ err }, 'Erro ao gerar token CSRF');
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro ao gerar token CSRF' } });
+  }
+});
+
+// POST /auth/register - Registrar novo usuário
+authRouter.post('/register', authLimiter, async (req: Request, res: Response) => {
+  const span = tracer.startSpan('auth.register');
+  try {
+    const inputData = req.body;
+
+    // reCAPTCHA removido: não validar token
 
     const input = registerSchema.parse(inputData);
     const tokens = await authService.register(input);
@@ -107,41 +169,47 @@ authRouter.post('/register', authLimiter, async (req: Request, res: Response) =>
       path: '/',
     });
 
-    res.status(201).json({ 
-      accessToken: tokens.accessToken, 
+    res.status(201).json({
+      success: true,
+      accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresIn: 15 * 60, // 15 minutos em segundos
     });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      // Use issues for cross-version compatibility
-      return res.status(400).json({ issues: err.issues });
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Dados inválidos',
+          details: err.errors,
+        },
+      });
     }
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return res.status(400).json({ error: message });
+    logger.error({ err }, 'Erro no registro');
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
+  } finally {
+    span.end();
   }
 });
 
+// POST /auth/login - Login do usuário
 authRouter.post('/login', authLimiter, async (req: Request, res: Response) => {
-  const ip = req.ip || 'unknown';
+  const span = tracer.startSpan('auth.login');
   try {
-    // Validar reCAPTCHA se fornecido
-    const { recaptchaToken, ...inputData } = req.body as { recaptchaToken?: string } & z.infer<typeof loginSchema>;
-    if (recaptchaToken) {
-      const isValid = await verifyRecaptcha(recaptchaToken, ip);
-      if (!isValid) {
-        return res.status(400).json({ error: 'reCAPTCHA validation failed' });
-      }
-    }
+    const inputData = req.body;
+    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
 
+    // reCAPTCHA removido: não validar token
+
+    await checkLock(inputData.email, clientIp);
     const input = loginSchema.parse(inputData);
-    const tokens = await authService.login(input, ip);
+    const tokens = await authService.login(input, clientIp);
 
     // Configurar HttpOnly cookies
     const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
-      secure: isProduction, // HTTPS only em produção
+      secure: isProduction,
       sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 minutos
       path: '/',
@@ -155,196 +223,186 @@ authRouter.post('/login', authLimiter, async (req: Request, res: Response) => {
       path: '/',
     });
 
-    res.status(200).json({ 
-      accessToken: tokens.accessToken, 
+    res.json({
+      success: true,
+      accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresIn: 15 * 60, // 15 minutos em segundos
     });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return res.status(400).json({ issues: err.issues });
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Dados inválidos',
+          details: err.errors,
+        },
+      });
     }
-    const message = err instanceof Error ? err.message : 'Unauthorized';
-    return res.status(401).json({ error: message });
+    if ((err as Error).message === 'Too many attempts, temporarily locked') {
+      return res.status(429).json({ error: { code: 'TOO_MANY_ATTEMPTS', message: 'Muitas tentativas. Tente novamente mais tarde.' } });
+    }
+    if ((err as Error).message === 'Invalid credentials') {
+      return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'Credenciais inválidas' } });
+    }
+    logger.error({ err }, 'Erro no login');
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
+  } finally {
+    span.end();
   }
 });
 
-authRouter.post('/refresh', async (req, res) => {
-  const { refreshToken } = req.body as { refreshToken?: string };
-  if (!refreshToken) return res.status(400).json({ error: 'refreshToken required' });
+// POST /auth/logout - Logout do usuário
+authRouter.post('/logout', authMiddleware, async (req: Request, res: Response) => {
   try {
+    // Limpar cookies
+    res.clearCookie('accessToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/' });
+
+    // TODO: Invalidar token no servidor (adicionar à blacklist)
+    
+    res.json({ success: true });
+  } catch (err) {
+    logger.error({ err }, 'Erro no logout');
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
+  }
+});
+
+// POST /auth/refresh - Refresh token
+authRouter.post('/refresh', async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    
+    if (!refreshToken) {
+      return res.status(401).json({ error: { code: 'REFRESH_TOKEN_MISSING', message: 'Refresh token não fornecido' } });
+    }
+
     const tokens = await authService.refreshToken(refreshToken);
-    res.status(200).json(tokens);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unauthorized';
-    return res.status(401).json({ error: message });
-  }
-});
 
-// MFA Request: generate 6-digit OTP, store hash + 5min expiry, send email
-authRouter.post('/mfa/request', mfaLimiter, async (req, res) => {
-  const ip = req.ip || 'unknown';
-  try {
-    const { email } = mfaRequestSchema.parse(req.body);
-    await checkLock(email, ip);
-    const user = await prisma.user.findUnique({ where: { email } });
-    // Avoid user enumeration: always respond 200, only proceed internally if user exists
-    if (user) {
-      {
-        const span = tracer.startSpan('auth.mfa.request');
-        try {
-          span.setAttribute('auth.email', email);
-          const otp = crypto.randomInt(0, 1000000).toString().padStart(6, '0');
-          const codeHash = await bcrypt.hash(otp, 12);
-          const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-          await prisma.userOtp.create({ data: { userId: user.id, codeHash, expiresAt } });
-          await emailService.sendOtpEmail(email, otp);
-          logger.info({ email, userId: user.id }, 'MFA OTP generated and email sent');
-          span.addEvent('auth.mfa.otp_generated');
-        } finally {
-          span.end();
-        }
-      }
-      await recordSuccess(email, ip); // generating is not a failure, but resets window
-    }
-    return res.status(200).json({ status: 'ok' });
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      return res.status(400).json({ issues: err.issues });
-    }
-    if (err instanceof Error && /locked/i.test(err.message)) {
-      return res.status(429).json({ error: err.message });
-    }
-    logger.error({ err }, 'MFA request failed');
-    await recordFailure((req.body?.email as string) ?? 'unknown', ip);
-    return res.status(400).json({ error: 'Unable to process MFA request' });
-  }
-});
-
-// MFA Verify: check hash + expiry, mark consumed, return tokens
-authRouter.post('/mfa/verify', authLimiter, async (req, res) => {
-  const ip = req.ip || 'unknown';
-  try {
-    const { email, otp } = mfaVerifySchema.parse(req.body);
-    await checkLock(email, ip);
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      await recordFailure(email, ip);
-      return res.status(401).json({ error: 'Invalid or expired code' });
-    }
-    const now = new Date();
-    const record = await prisma.userOtp.findFirst({
-      where: { userId: user.id, consumedAt: null, expiresAt: { gt: now } },
-      orderBy: { createdAt: 'desc' },
+    // Configurar novos cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000,
+      path: '/',
     });
-    if (!record) {
-      await recordFailure(email, ip);
-      return res.status(401).json({ error: 'Invalid or expired code' });
-    }
-    const valid = await bcrypt.compare(otp, record.codeHash);
-    if (!valid) {
-      await recordFailure(email, ip);
-      return res.status(401).json({ error: 'Invalid or expired code' });
-    }
 
-    {
-      const span = tracer.startSpan('auth.mfa.verify');
-      try {
-        span.setAttribute('auth.email', email);
-        await prisma.userOtp.update({ where: { id: record.id }, data: { consumedAt: new Date() } });
-        await recordSuccess(email, ip);
-        const tokens = await authService.issueTokensForUserId(user.id);
-        logger.info({ email, userId: user.id }, 'MFA verification success');
-        span.addEvent('auth.mfa.verify.success');
-        return res.status(200).json(tokens);
-      } finally {
-        span.end();
-      }
-    }
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    res.json({
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: 15 * 60,
+    });
   } catch (err) {
-    if (err instanceof z.ZodError) {
-      return res.status(400).json({ issues: err.issues });
-    }
-    if (err instanceof Error && /locked/i.test(err.message)) {
-      return res.status(429).json({ error: err.message });
-    }
-    const message = err instanceof Error ? err.message : 'Unauthorized';
-    logger.error({ err }, 'MFA verification failed');
-    return res.status(401).json({ error: message });
+    logger.error({ err }, 'Erro ao renovar token');
+    res.status(401).json({ error: { code: 'INVALID_REFRESH_TOKEN', message: 'Token de renovação inválido' } });
   }
 });
 
-// Forgot Password: generate reset token, store hash + 1h expiry, send email
-const forgotPasswordSchema = z.object({
-  email: z.string().email(),
-  recaptchaToken: z.string().optional(),
+// POST /auth/mfa/request - Solicitar OTP por e-mail
+authRouter.post('/mfa/request', mfaLimiter, async (req: Request, res: Response) => {
+  const span = tracer.startSpan('auth.mfa.request');
+  try {
+    const input = mfaRequestSchema.parse(req.body);
+    const otp = await authService.requestMfa(input.email);
+    await emailService.sendOtpEmail(input.email, otp);
+    res.json({ success: true });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Email inválido' } });
+    }
+    logger.error({ err }, 'Erro ao solicitar MFA');
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
+  } finally {
+    span.end();
+  }
 });
 
+// POST /auth/mfa/verify - Verificar OTP e obter tokens
+authRouter.post('/mfa/verify', mfaLimiter, async (req: Request, res: Response) => {
+  const span = tracer.startSpan('auth.mfa.verify');
+  try {
+    const input = mfaVerifySchema.parse(req.body);
+    const tokens = await authService.verifyMfa(input.email, input.otp);
+
+    // Configurar HttpOnly cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000,
+      path: '/',
+    });
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    res.json({
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: 15 * 60,
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Dados inválidos' } });
+    }
+    if ((err as Error).message.includes('Invalid') || (err as Error).message.includes('expired')) {
+      return res.status(401).json({ error: { code: 'INVALID_OTP', message: 'OTP inválido ou expirado' } });
+    }
+    logger.error({ err }, 'Erro ao verificar MFA');
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
+  } finally {
+    span.end();
+  }
+});
+
+// POST /auth/forgot-password - Solicitar recuperação de senha
 authRouter.post('/forgot-password', authLimiter, async (req: Request, res: Response) => {
-  const ip = req.ip || 'unknown';
   try {
-    const { email, recaptchaToken } = forgotPasswordSchema.parse(req.body);
+    const { email } = req.body;
 
-    // Validar reCAPTCHA se fornecido
-    if (recaptchaToken) {
-      const isValid = await verifyRecaptcha(recaptchaToken, ip);
-      if (!isValid) {
-        return res.status(400).json({ error: 'reCAPTCHA validation failed' });
-      }
-    }
-
-    await checkLock(email, ip);
+    // Verificar se usuário existe (não revelar se existe ou não por segurança)
     const user = await prisma.user.findUnique({ where: { email } });
-
-    // Avoid user enumeration: always respond 200, only proceed internally if user exists
     if (user) {
-      const span = tracer.startSpan('auth.forgot-password');
-      try {
-        span.setAttribute('auth.email', email);
-        
-        // Gerar token de reset (32 bytes = 64 hex chars)
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const tokenHash = await bcrypt.hash(resetToken, 12);
-        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+      // Gerar token de recuperação
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const tokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1); // Expira em 1 hora
 
-        // Armazenar token no banco
-        await prisma.passwordResetToken.create({
-          data: {
-            userId: user.id,
-            tokenHash,
-            expiresAt,
-          },
-        });
+      await prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash,
+          expiresAt,
+        },
+      });
 
-        // Enviar email com link de reset
-        await emailService.sendPasswordResetEmail(email, resetToken);
-        
-        logger.info({ email, userId: user.id }, 'Password reset token generated and email sent');
-        span.addEvent('auth.forgot-password.token_generated');
-      } catch (error) {
-        logger.error({ error, email }, 'Error generating password reset token');
-        span.addEvent('auth.forgot-password.error');
-      } finally {
-        span.end();
-      }
-      await recordSuccess(email, ip);
+      // Enviar email de recuperação
+      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/reset-password?token=${resetToken}`;
+      await emailService.sendPasswordResetEmail(user.email, resetUrl);
     }
 
-    // Sempre retornar sucesso para evitar user enumeration
-    return res.status(200).json({ 
-      status: 'ok',
-      message: 'If the email exists, a password reset link has been sent.',
-    });
+    // Sempre retornar sucesso (não revelar se email existe)
+    res.json({ success: true, message: 'Se o email existir, você receberá instruções de recuperação' });
   } catch (err) {
-    if (err instanceof z.ZodError) {
-      return res.status(400).json({ issues: err.issues });
-    }
-    if (err instanceof Error && /locked/i.test(err.message)) {
-      return res.status(429).json({ error: err.message });
-    }
-    logger.error({ err }, 'Forgot password request failed');
-    await recordFailure((req.body?.email as string) ?? 'unknown', ip);
-    return res.status(400).json({ error: 'Unable to process password reset request' });
+    logger.error({ err }, 'Erro ao solicitar recuperação de senha');
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
   }
 });
 

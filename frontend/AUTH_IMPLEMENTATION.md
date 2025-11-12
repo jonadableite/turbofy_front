@@ -13,7 +13,7 @@ Este documento descreve a implementação completa da camada de autenticação d
 - **react-hook-form** + **zod** - Validação type-safe
 - **framer-motion** - Animações
 - **zxcvbn** - Medidor de força de senha
-- **react-google-recaptcha-v3** - Proteção contra bots
+- Proteções de rate limiting e validação server-side
 - **Lucide React** - Ícones
 
 ## 📁 Estrutura de Arquivos
@@ -26,7 +26,7 @@ frontend/src/
 │   │   ├── register/page.tsx        # Página de registro
 │   │   └── forgot/page.tsx          # Página de recuperação de senha
 │   ├── layout.tsx                   # Layout raiz com providers
-│   ├── providers.tsx                # Theme & reCAPTCHA providers
+│   ├── providers.tsx                # Theme & Auth providers
 │   └── globals.css                  # CSS variables + Tailwind
 │
 ├── components/
@@ -42,7 +42,7 @@ frontend/src/
 │   └── utils.ts                     # Utilitários (cn helper)
 │
 ├── hooks/
-│   └── useRecaptcha.ts              # Hook para reCAPTCHA v3
+│   └── (removido)                   # reCAPTCHA não utilizado
 │
 └── __tests__/
     └── auth/
@@ -56,7 +56,6 @@ frontend/src/
 **Recursos:**
 - ✅ Validação com Zod (email válido, senha mínima 8 caracteres)
 - ✅ Rate limiting no cliente (5 tentativas = bloqueio de 30s)
-- ✅ Integração com reCAPTCHA v3
 - ✅ Mensagens de erro acessíveis
 - ✅ Redirect para `/dashboard` após login bem-sucedido
 - ✅ Link para recuperação de senha
@@ -64,8 +63,7 @@ frontend/src/
 
 **Fluxo:**
 1. Usuário preenche email e senha
-2. reCAPTCHA v3 executa em background
-3. Chamada para `POST /auth/login` com token reCAPTCHA
+2. Chamada para `POST /auth/login`
 4. Backend valida e retorna `accessToken` + `refreshToken` via HttpOnly cookie
 5. Redirect para dashboard
 
@@ -80,23 +78,20 @@ frontend/src/
   - Confirmação de senha
 - ✅ **Medidor de força de senha** em tempo real com `zxcvbn`
 - ✅ Sugestões de melhoria de senha
-- ✅ Integração com reCAPTCHA v3
 - ✅ Termos de serviço e privacidade
 
 **Fluxo:**
 1. Usuário preenche todos os campos obrigatórios
 2. Sistema valida e mostra força da senha
-3. reCAPTCHA v3 executa em background
-4. Chamada para `POST /auth/register` com dados + token reCAPTCHA
-5. Backend cria usuário e retorna tokens via HttpOnly cookie
-6. Redirect para dashboard
+3. Chamada para `POST /auth/register` com dados
+4. Backend cria usuário e retorna tokens via HttpOnly cookie
+5. Redirect para dashboard
 
 ### 3. **Página de Recuperação de Senha** (`/forgot`)
 
 **Recursos:**
 - ✅ Formulário simples com apenas email
 - ✅ Mensagem de sucesso genérica (não revela se email existe - segurança)
-- ✅ Integração com reCAPTCHA v3
 - ✅ Animação de sucesso com ícone CheckCircle
 - ✅ Link de volta para login
 
@@ -126,20 +121,6 @@ Os tokens JWT **não são armazenados no localStorage** por questões de seguran
 
 Cliente envia `credentials: "include"` em todas as requisições para o backend incluir o cookie automaticamente.
 
-### reCAPTCHA v3
-
-Proteção contra bots e ataques automatizados. O token é gerado em background e enviado em todas as requisições de autenticação.
-
-```typescript
-const recaptchaToken = await executeRecaptcha("login");
-// Enviado no body da requisição
-```
-
-**Configuração necessária:**
-Adicionar no `.env.local`:
-```
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=sua_chave_publica_aqui
-```
 
 ### Rate Limiting (Cliente)
 
@@ -293,9 +274,9 @@ pnpm test
 
 | Método | Endpoint | Body | Response |
 |--------|----------|------|----------|
-| `POST` | `/auth/login` | `{ email, password, recaptchaToken }` | `{ accessToken, refreshToken, expiresIn }` |
-| `POST` | `/auth/register` | `{ email, password, document, phone?, recaptchaToken }` | `{ accessToken, refreshToken, expiresIn }` |
-| `POST` | `/auth/forgot-password` | `{ email, recaptchaToken }` | `{ status: "ok" }` |
+| `POST` | `/auth/login` | `{ email, password }` | `{ accessToken, refreshToken, expiresIn }` |
+| `POST` | `/auth/register` | `{ email, password, document, phone? }` | `{ accessToken, refreshToken, expiresIn }` |
+| `POST` | `/auth/forgot-password` | `{ email }` | `{ status: "ok" }` |
 | `GET` | `/api/auth/csrf` | - | `{ csrfToken }` |
 
 ### Variáveis de Ambiente
@@ -305,9 +286,6 @@ Criar `.env.local`:
 ```bash
 # URL da API backend
 NEXT_PUBLIC_API_URL=http://localhost:3000
-
-# reCAPTCHA v3
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6Lc...
 ```
 
 ## 📝 Próximos Passos
@@ -328,9 +306,7 @@ NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6Lc...
    - Enviar email com link
    - Criar página `/reset-password/:token`
 
-4. ✅ **Validar reCAPTCHA no backend**
-   - Verificar token enviado pelo cliente
-   - Validar score mínimo (ex: 0.5)
+4. ✅ Melhorar observabilidade e auditoria de eventos críticos
 
 ### Frontend (Melhorias)
 
@@ -368,7 +344,6 @@ pnpm dev
 - [React Hook Form](https://react-hook-form.com/)
 - [Zod Validation](https://zod.dev/)
 - [Framer Motion](https://www.framer.com/motion/)
-- [reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3)
 - [WCAG 2.1 AA](https://www.w3.org/WAI/WCAG21/quickref/)
 - [OWASP Auth Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
 

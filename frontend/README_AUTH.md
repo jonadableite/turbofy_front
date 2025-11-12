@@ -9,7 +9,6 @@ Todas as telas de autenticação foram implementadas com foco em **segurança**,
 ### 1. Login (`/login`)
 - ✅ Validação de email e senha
 - ✅ Rate limiting (bloqueio após 5 tentativas)
-- ✅ Integração com reCAPTCHA v3
 - ✅ Link para recuperação de senha
 - ✅ Animações suaves
 
@@ -17,13 +16,11 @@ Todas as telas de autenticação foram implementadas com foco em **segurança**,
 - ✅ Validação completa (email, senha forte, CPF/CNPJ, telefone)
 - ✅ Medidor de força de senha em tempo real
 - ✅ Sugestões de melhoria de senha
-- ✅ Integração com reCAPTCHA v3
 - ✅ Confirmação de senha
 
 ### 3. Recuperar Senha (`/forgot`)
 - ✅ Formulário simples com apenas email
 - ✅ Mensagem de sucesso genérica (segurança)
-- ✅ Integração com reCAPTCHA v3
 - ✅ Animação de confirmação
 
 ## 🎨 Design & UX
@@ -45,7 +42,6 @@ Todas as telas de autenticação foram implementadas com foco em **segurança**,
 ### Implementado
 - ✅ **CSRF Protection** - Token automático em requisições mutáveis
 - ✅ **HttpOnly Cookies** - Tokens JWT armazenados de forma segura
-- ✅ **reCAPTCHA v3** - Proteção contra bots
 - ✅ **Rate Limiting (Client)** - Bloqueio após 5 tentativas
 - ✅ **Password Policy** - Senha forte obrigatória no registro
 - ✅ **Autocomplete Security** - `new-password` para senhas
@@ -53,7 +49,6 @@ Todas as telas de autenticação foram implementadas com foco em **segurança**,
 ### Pendente no Backend
 - ⚠️ Endpoint `/api/auth/csrf` (gerar e validar token CSRF)
 - ⚠️ Endpoint `/auth/forgot-password` (envio de email de reset)
-- ⚠️ Validação de reCAPTCHA no servidor
 - ⚠️ Configuração de HttpOnly cookies no `Set-Cookie`
 
 ## ♿ Acessibilidade (WCAG 2.1 AA)
@@ -73,7 +68,6 @@ Crie `.env.local` na raiz do frontend:
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=sua_chave_aqui
 ```
 
 Veja `ENV_EXAMPLE.md` para detalhes completos.
@@ -122,16 +116,7 @@ pnpm dev
    - Enviar email com link
    - Criar endpoint de validação de token
 
-4. **Validar reCAPTCHA**
-   ```typescript
-   const response = await fetch(
-     'https://www.google.com/recaptcha/api/siteverify',
-     {
-       method: 'POST',
-       body: `secret=${SECRET_KEY}&response=${token}`
-     }
-   );
-   ```
+4. Ajustar fluxos de recuperação de senha e reset conforme requisitos
 
 ### Frontend (Melhorias Futuras)
 
@@ -168,7 +153,7 @@ Veja `AUTH_IMPLEMENTATION.md` para documentação técnica detalhada, incluindo:
 
 - ✅ Type-safe (TypeScript strict)
 - ✅ Validação robusta (Zod)
-- ✅ Segurança (CSRF, reCAPTCHA, rate limiting)
+- ✅ Segurança (CSRF, rate limiting)
 - ✅ Acessibilidade (WCAG 2.1 AA)
 - ✅ Responsividade (mobile-first)
 - ✅ Animações (Framer Motion)

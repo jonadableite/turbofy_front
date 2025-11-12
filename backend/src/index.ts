@@ -26,6 +26,7 @@ import { setupSwagger } from "./infrastructure/http/swagger";
 import { chargesRouter } from "./infrastructure/http/routes/chargesRoutes";
 import { settlementsRouter } from "./infrastructure/http/routes/settlementsRoutes";
 import { reconciliationsRouter } from "./infrastructure/http/routes/reconciliationsRoutes";
+import { dashboardRouter } from "./infrastructure/http/routes/dashboardRoutes";
 
 const app = express();
 
@@ -33,9 +34,16 @@ const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*", // TODO: restrict in production
+    // Nunca usar '*' quando credentials: true. Em dev, permitir o frontend em 3001.
+    origin: process.env.CORS_ORIGIN ?? "http://localhost:3001",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key", "X-Idempotency-Key", "X-CSRF-Token"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Idempotency-Key",
+      "X-Idempotency-Key",
+      "X-CSRF-Token",
+    ],
     credentials: true, // Permitir cookies (necessário para HttpOnly cookies)
   })
 );
@@ -109,13 +117,22 @@ app.use(
 
 app.disable("x-powered-by");
 
-// Basic rate limiting ~ 100 req / 15 min per IP
+// Basic rate limiting - mais permissivo em desenvolvimento
+const isDevelopment = process.env.NODE_ENV === 'development';
 app.use(
   rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: isDevelopment ? 1000 : 100, // 1000 req/15min em dev, 100 em produção
     standardHeaders: true,
     legacyHeaders: false,
+    // Skip rate limiting para localhost em desenvolvimento
+    skip: (req) => {
+      if (isDevelopment) {
+        const ip = req.ip || req.socket.remoteAddress || '';
+        return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+      }
+      return false;
+    },
   })
 );
 
@@ -134,37 +151,85 @@ app.use('/auth', authRouter);
 app.use('/charges', chargesRouter);
 app.use('/settlements', settlementsRouter);
 app.use('/reconciliations', reconciliationsRouter);
+app.use('/dashboard', dashboardRouter);
 // TODO: Register domain routers here (payments, merchants etc.)
 
 // Swagger docs
-setupSwagger(app);
+try {
+  setupSwagger(app);
+  logger.info('[SWAGGER] Swagger configurado com sucesso');
+} catch (err) {
+  logger.error({ err }, '[SWAGGER] Erro ao configurar Swagger');
+  console.error(chalk.red(`\n⚠️  Aviso: Erro ao configurar Swagger: ${err instanceof Error ? err.message : 'Erro desconhecido'}\n`));
+  // Não interrompe o servidor se o Swagger falhar
+}
 
 const PORT = Number(env.PORT);
+logger.info({ port: PORT }, '[SERVER] Iniciando servidor na porta');
 
 if (process.env.NODE_ENV !== "test") {
-  app.listen(PORT, () => {
-    // Banner de inicialização melhorado (usando símbolos ASCII para compatibilidade)
-    console.log('\n' + chalk.cyan('═'.repeat(60)));
-    console.log(chalk.bold.blue('  [TURBOFY GATEWAY - API BACKEND]'));
-    console.log(chalk.cyan('═'.repeat(60)));
-    console.log(chalk.green(`  [OK] Servidor:       http://localhost:${PORT}`));
-    console.log(chalk.green(`  [OK] Documentação:   http://localhost:${PORT}/docs`));
-    console.log(chalk.green(`  [OK] Health Check:   http://localhost:${PORT}/healthz`));
-    console.log(chalk.cyan('═'.repeat(60)));
-    console.log(chalk.yellow(`  [INFO] Ambiente:      ${env.NODE_ENV}`));
-    console.log(chalk.yellow(`  [INFO] CORS Origin:   ${process.env.CORS_ORIGIN || '*'}`));
-    console.log(chalk.cyan('═'.repeat(60)));
-    console.log(chalk.magenta('  [ENDPOINTS] Disponíveis:'));
-    console.log(chalk.white('     • POST /auth/register       - Criar conta'));
-    console.log(chalk.white('     • POST /auth/login          - Fazer login'));
-    console.log(chalk.white('     • POST /auth/forgot-password - Recuperar senha'));
-    console.log(chalk.white('     • GET  /api/auth/csrf       - Token CSRF'));
-    console.log(chalk.white('     • POST /charges             - Criar cobrança'));
-    console.log(chalk.cyan('═'.repeat(60)));
-    console.log(chalk.green.bold('  [READY] Servidor pronto para receber requisições!\n'));
-    
-    logger.info('[STARTED] Turbofy API iniciada com sucesso');
-  });
+  try {
+    const server = app.listen(PORT, "0.0.0.0", () => {
+      // Banner de inicialização melhorado (usando símbolos ASCII para compatibilidade)
+      console.log('\n' + chalk.cyan('═'.repeat(60)));
+      console.log(chalk.bold.blue('  [TURBOFY GATEWAY - API BACKEND]'));
+      console.log(chalk.cyan('═'.repeat(60)));
+      console.log(chalk.green(`  [OK] Servidor:       http://localhost:${PORT}`));
+      console.log(chalk.green(`  [OK] Documentação:   http://localhost:${PORT}/docs`));
+      console.log(chalk.green(`  [OK] Health Check:   http://localhost:${PORT}/healthz`));
+      console.log(chalk.cyan('═'.repeat(60)));
+      console.log(chalk.yellow(`  [INFO] Ambiente:      ${env.NODE_ENV}`));
+      console.log(chalk.yellow(`  [INFO] CORS Origin:   ${process.env.CORS_ORIGIN || '*'}`));
+      console.log(chalk.cyan('═'.repeat(60)));
+      console.log(chalk.magenta('  [ENDPOINTS] Disponíveis:'));
+      console.log(chalk.white('     • POST /auth/register       - Criar conta'));
+      console.log(chalk.white('     • POST /auth/login          - Fazer login'));
+      console.log(chalk.white('     • POST /auth/forgot-password - Recuperar senha'));
+      console.log(chalk.white('     • GET  /api/auth/csrf       - Token CSRF'));
+      console.log(chalk.white('     • POST /charges             - Criar cobrança'));
+      console.log(chalk.cyan('═'.repeat(60)));
+      console.log(chalk.green.bold('  [READY] Servidor pronto para receber requisições!\n'));
+      
+      logger.info('[STARTED] Turbofy API iniciada com sucesso');
+    });
+
+    // Tratamento de erros do servidor
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        logger.error(`[ERROR] Porta ${PORT} já está em uso. Tente usar outra porta.`);
+        console.error(chalk.red(`\n❌ Erro: Porta ${PORT} já está em uso!\n`));
+        console.error(chalk.yellow('Soluções:'));
+        console.error(chalk.white('  1. Pare o processo que está usando a porta 3000'));
+        console.error(chalk.white('  2. Ou altere a variável PORT no arquivo .env\n'));
+        process.exit(1);
+      } else {
+        logger.error({ err }, '[ERROR] Erro ao iniciar servidor');
+        console.error(chalk.red(`\n❌ Erro ao iniciar servidor: ${err.message}\n`));
+        process.exit(1);
+      }
+    });
+
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      logger.info('[SHUTDOWN] Recebido SIGTERM, encerrando servidor...');
+      server.close(() => {
+        logger.info('[SHUTDOWN] Servidor encerrado');
+        process.exit(0);
+      });
+    });
+
+    process.on('SIGINT', () => {
+      logger.info('[SHUTDOWN] Recebido SIGINT, encerrando servidor...');
+      server.close(() => {
+        logger.info('[SHUTDOWN] Servidor encerrado');
+        process.exit(0);
+      });
+    });
+  } catch (err) {
+    logger.error({ err }, '[ERROR] Erro fatal ao inicializar servidor');
+    console.error(chalk.red(`\n❌ Erro fatal: ${err instanceof Error ? err.message : 'Erro desconhecido'}\n`));
+    process.exit(1);
+  }
 }
 
 export { app };
