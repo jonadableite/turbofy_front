@@ -68,4 +68,14 @@ describe("POST /charges", () => {
     expect(second.status).toBe(201);
     expect(second.body.id).toBe(first.body.id);
   });
+
+  it("returns 400 when method is invalid", async () => {
+    const res = await request(app)
+      .post("/charges")
+      .set("X-Idempotency-Key", "route-idem-INVALID-001")
+      .send({ merchantId, amountCents: 1000, method: "CARD", idempotencyKey: "route-idem-INVALID-001" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
 });

@@ -137,3 +137,174 @@ Turbofy — Regras do Projeto e Guia de Engenharia
 
 - Evite sempre usar any
 - Numca crie codigos basicos sempre crie codigos completos e profissionais
+
+**Code Sandards**
+
+- SEMPRE mova magic numbers para consantes.
+- O nome de um metodo ou funçao deve ser sempre um verbo, e nunca um substantivo.
+- NUNCA faça o aninhamento de um ou mais if/else de preferencia para early returns.
+- Evite ao maximo repetiçao de codigo. Preffira mover logicas para funçoes e classes para evitar duplicidade.
+- Declare as variaveis o mais proximo possivel de onde serao utilizadas.
+- Use PascalCase para classes e interfaces.
+- Use camelCase para declaraçao de metodos funçoes e variaveis.
+- Use kebab-case para arquivos e diretorios.
+
+**TypeScript**
+
+- Utilize pnpm como ferramentta para gerenciar dependencias e executar scripts
+- Use const ao inves de let sempre que possivel
+- SEMPRE use interfaces ao inves de types (exceto quando types forem estritamente necessarios)
+- Prefira usar arrow functions e nao funçoes convencionais.
+- SEMPRE utilize aync/await para lidar com Promises.
+- NUNCA ultilize any, sempre use types existentes ou crie novos quando necessario.
+- NUNCA ultilize var para declarar uma variavel, prefira sempre cons ou let.
+- Caso um metodo ou funçao receba mais de 2 parametros, SEMPRE utilize um objeto como parametro para receber esses valores.
+
+**Node.js**
+
+- Prefira usar bibliotecas nativas como Node.js antes de instalar bibliotecas (crypto.randomUUID ao inves de uuidv4, por exemplo)
+- SEMPRE use named exports, NUNCA default exports.
+- Use Jest para escrever testes.
+- Siga o principio de Arrange Act Assert nos testes.
+- Crie testes para todos os use cases e use a biblioteca testcontainers para subir banco de dados de teste, quando necessario.
+- SEMPRE encerre conexoes com banco de dados ou mensageria depois de executar os testes.
+- SEMPRE siga Arquitetura Hexagonal nas suas tarefas. Uma rota deve ser SEMPRE divida em Driver, Application e Resource.
+
+**React/Next.js**
+
+- Framework base: **Next.js (App Router)** com React 18+, otimizado para SSR/SSG/ISR e edge runtime.
+- Estilo e design system: **TailwindCSS v4**, **shadcn/ui**, **Magic UI** e **Aceternity UI**.
+- O frontend deve ser **totalmente responsivo**, adaptável para **desktop e mobile**, priorizando experiência “**app-like**” e estética **premium/cybersecurity**.
+
+**Arquitetura e Estrutura**
+
+- `src/app` → App Router (layouts, routes e server components).
+- `src/components` → componentes atômicos reutilizáveis (PascalCase).
+- `src/features` → domínios funcionais (ex.: cobranças, repasses, conciliação).
+- `src/hooks` → hooks customizados (`use-` prefix).
+- `src/lib` → utilitários, funções helpers e clientes de API.
+- `src/styles` → tokens, temas e variáveis globais Tailwind.
+- `src/ui` → extensões do shadcn/ui e variantes com CVA.
+- `public/` → assets estáticos, ícones, manifest e service worker (PWA).
+
+**Design System e UI**
+
+- Basear-se no **shadcn/ui** para consistência, acessibilidade e tipagem.
+- **Magic UI** e **Aceternity UI** podem ser usados para microinterações, efeitos e transições — sempre com revisão de performance e acessibilidade.
+- Utilizar **class-variance-authority (CVA)** e `cn()` para variantes visuais e composição de estilos.
+- Tokens centralizados (cores, espaçamentos, fontes, bordas) em `tailwind.config.ts`.
+- Usar **OKLCH** para definição de cores, garantindo contraste e consistência visual.
+- Layout **mobile-first**; design fluido e otimizado para telas menores.
+
+**Componentes e Convenções**
+
+- Componentes nomeados com **PascalCase** e exportados de forma nomeada (`export const Component = ...`).
+- Arquivos e diretórios em **kebab-case**.
+- Props tipadas via **interfaces**, nunca `any` ou `type` genéricos.
+- Evitar componentes acima de 300 linhas — extrair lógica para hooks (`src/hooks`) ou helpers (`src/lib`).
+- Todos os componentes devem ser acessíveis (ARIA, roles, labels, foco).
+
+**Server e Client Components**
+
+- Usar **Server Components** por padrão para SSR e segurança.
+- Usar **Client Components** apenas quando houver interatividade (forms, animações, etc.).
+- Server Actions para operações seguras (ex.: criar cobrança, gerar boleto).
+- Endpoints em `app/api/.../route.ts` para webhooks e handlers dedicados.
+
+**Data Fetching e Estado**
+
+- Server-side data fetching com revalidação (`revalidate`, `no-store`, etc.).
+- **useSWR** ou **React Query** apenas para dados reativos client-side.
+- Tipar responses com **Zod schemas** (validação e parsing).
+- Nunca expor segredos no cliente; dados sensíveis sempre carregados via Server Components.
+
+**Formulários e Validação**
+
+- Usar **react-hook-form** + **zod** para validação tipada e feedbacks de erro.
+- Feedbacks visuais com **toasts** (shadcn/ui + sonner).
+- Idempotência garantida via `Idempotency-Key` e UI com estados de carregamento.
+- Campos sensíveis mascarados e com validação sanitizada.
+
+**Acessibilidade (A11y)**
+
+- Cumprir **WCAG 2.1 nível AA**.
+- Contraste mínimo 4.5:1 para textos.
+- Suporte completo a navegação via teclado (tabindex, focus, aria-labels).
+- Modais com focus trap e retorno de foco após fechamento.
+- Testes de acessibilidade com **axe-core** e **Lighthouse**.
+
+**Animações e Motion**
+
+- Usar **Framer Motion** para microinterações leves.
+- Respeitar preferências do usuário (`prefers-reduced-motion`).
+- Evitar bloqueios de interação e layout shifts (CLS).
+- Animações rápidas, fluidas e sutis (efeito premium, não exagerado).
+
+**Performance e Bundle**
+
+- Medir bundle size com `@next/bundle-analyzer`.
+- **Dynamic Import** para componentes pesados (charts, tabelas, editores).
+- Imagens otimizadas com `<Image />` e formatos modernos (WebP, AVIF).
+- Fonts com `next/font` e `font-display: swap`.
+- Evitar `@apply` excessivo; priorizar classes utilitárias.
+
+**Segurança no Frontend**
+
+- Nunca expor chaves ou tokens no client (`NEXT_PUBLIC_` apenas para dados públicos).
+- CSP rigorosa (sem inline scripts não verificados).
+- Sanitizar HTML dinâmico (DOMPurify).
+- Cookies seguros (`HttpOnly`, `Secure`, `SameSite`).
+- Validar tokens e dados sensíveis apenas server-side.
+
+**PWA e Mobile Experience**
+
+- Manifest e Service Worker configurados para comportamento **app-like**.
+- Cache apenas de assets estáticos — **nunca dados financeiros**.
+- Touch targets ≥ 44px e gestos otimizados para mobile.
+- Splash screens e ícones adaptados.
+
+**Gráficos e Dados**
+
+- **react-virtual** para listas grandes.
+- Paginação e filtros server-side.
+- Export de relatórios (CSV/XLSX) processado no backend.
+- Visualizações leves (Recharts/ECharts) com lazy loading.
+
+**Testes e Qualidade**
+
+- **Jest + Testing Library** para unit tests.
+- **Playwright** para testes E2E (flows críticos).
+- **axe-core** para auditorias de acessibilidade.
+- **Storybook** para documentação visual de componentes.
+- CI com gates de lint, typecheck e testes obrigatórios.
+
+**Lint, Build e Padronização**
+
+- ESLint (React, TypeScript, Tailwind, Accessibility).
+- Prettier com formatação padronizada.
+- `pnpm` para scripts e dependências.
+- Husky + lint-staged para hooks pré-commit.
+- Build e deploy bloqueados se qualquer gate falhar.
+
+**Observabilidade**
+
+- Integração com **Sentry/OpenTelemetry** (traceId em todas requests).
+- Monitorar métricas de UI, erros e tempo de renderização.
+- Respeitar LGPD (opt-in de tracking e anonimização de dados).
+
+**Nunca Faça**
+
+- Nunca usar `any`, `var` ou `default exports`.
+- Nunca deixar lógica de negócio no frontend.
+- Nunca usar bibliotecas não revisadas de segurança.
+- Nunca usar inline scripts ou eval.
+- Nunca expor informações financeiras no client.
+
+**Padrões Gerais**
+
+- Funções pequenas com **early return**.
+- Evitar duplicidade: extrair lógica repetida para hooks/helpers.
+- Usar `const` sempre que possível.
+- Nome de funções deve ser verbo (`handleSubmit`, `fetchData`, `renderChart`).
+- Imports ordenados e consistentes.
+- Nomear variáveis de forma clara e sem abreviações obscuras.

@@ -4,6 +4,17 @@ exports.ErrorResponseSchema = exports.CreateChargeResponseSchema = exports.Bolet
 const zod_1 = require("zod");
 exports.ChargeMethodSchema = zod_1.z.enum(["PIX", "BOLETO"]);
 exports.ChargeStatusSchema = zod_1.z.enum(["PENDING", "PAID", "EXPIRED", "CANCELED"]);
+const SplitSchema = zod_1.z.object({
+    merchantId: zod_1.z.string().uuid({ message: "merchantId must be a valid UUID" }),
+    amountCents: zod_1.z.number().int().positive().optional(),
+    percentage: zod_1.z.number().min(0).max(100).optional(),
+}).refine((data) => data.amountCents !== undefined || data.percentage !== undefined, {
+    message: "Either amountCents or percentage must be provided",
+});
+const FeeSchema = zod_1.z.object({
+    type: zod_1.z.string().min(1, "Fee type is required"),
+    amountCents: zod_1.z.number().int().nonnegative("amountCents must be non-negative"),
+});
 exports.CreateChargeRequestSchema = zod_1.z.object({
     merchantId: zod_1.z.string().uuid({ message: "merchantId inválido (UUID v4)" }),
     amountCents: zod_1.z.number().int().positive(),
@@ -14,6 +25,8 @@ exports.CreateChargeRequestSchema = zod_1.z.object({
     idempotencyKey: zod_1.z.string().min(8),
     externalRef: zod_1.z.string().max(128).optional(),
     metadata: zod_1.z.record(zod_1.z.string(), zod_1.z.unknown()).optional(),
+    splits: zod_1.z.array(SplitSchema).optional(),
+    fees: zod_1.z.array(FeeSchema).optional(),
 });
 exports.PixPayloadSchema = zod_1.z.object({
     qrCode: zod_1.z.string(),
@@ -38,6 +51,17 @@ exports.CreateChargeResponseSchema = zod_1.z.object({
     metadata: zod_1.z.record(zod_1.z.string(), zod_1.z.unknown()).nullable().optional(),
     pix: exports.PixPayloadSchema.optional(),
     boleto: exports.BoletoPayloadSchema.optional(),
+    splits: zod_1.z.array(zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        merchantId: zod_1.z.string().uuid(),
+        amountCents: zod_1.z.number().int(),
+        percentage: zod_1.z.number().optional(),
+    })).optional(),
+    fees: zod_1.z.array(zod_1.z.object({
+        id: zod_1.z.string().uuid(),
+        type: zod_1.z.string(),
+        amountCents: zod_1.z.number().int(),
+    })).optional(),
     createdAt: zod_1.z.string().datetime(),
     updatedAt: zod_1.z.string().datetime(),
 });

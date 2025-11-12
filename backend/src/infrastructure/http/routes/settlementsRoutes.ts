@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { CreateSettlementRequestSchema, ProcessSettlementRequestSchema } from "../schemas/settlements";
 import { ZodError } from "zod";
 import { PrismaSettlementRepository } from "../../database/PrismaSettlementRepository";
+import { prisma } from "../../database/prismaClient";
 import { StubBankingAdapter } from "../../adapters/banking/StubBankingAdapter";
 import { InMemoryMessagingAdapter } from "../../adapters/messaging/InMemoryMessagingAdapter";
 import { CreateSettlement } from "../../../application/useCases/CreateSettlement";
@@ -14,7 +15,7 @@ settlementsRouter.post("/", async (req: Request, res: Response) => {
   try {
     const parsed = CreateSettlementRequestSchema.parse(req.body);
 
-    const settlementRepository = new PrismaSettlementRepository();
+    const settlementRepository = new PrismaSettlementRepository(prisma);
     const messaging = new InMemoryMessagingAdapter();
 
     const useCase = new CreateSettlement(settlementRepository, messaging);
@@ -65,7 +66,7 @@ settlementsRouter.post("/:id/process", async (req: Request, res: Response) => {
       settlementId: req.params.id,
     });
 
-    const settlementRepository = new PrismaSettlementRepository();
+    const settlementRepository = new PrismaSettlementRepository(prisma);
     const banking = new StubBankingAdapter();
     const messaging = new InMemoryMessagingAdapter();
 

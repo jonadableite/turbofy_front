@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 export interface ChargeSplitProps {
   id?: string;
@@ -18,7 +18,7 @@ export class ChargeSplit {
   readonly createdAt: Date;
 
   constructor(props: ChargeSplitProps) {
-    this.id = props.id || uuidv4();
+    this.id = props.id || randomUUID();
     this.chargeId = props.chargeId;
     this.merchantId = props.merchantId;
     this.createdAt = props.createdAt || new Date();

@@ -5,7 +5,7 @@ import path from 'path';
 import { env } from '../../config/env';
 import { logger } from '../logger';
 
-type TemplateName = 'otp';
+type TemplateName = 'otp' | 'password-reset';
 
 export class EmailService {
   private transporter = nodemailer.createTransport({
@@ -38,5 +38,21 @@ export class EmailService {
       html,
     });
     logger.info({ to }, 'OTP email sent');
+  }
+
+  async sendPasswordResetEmail(to: string, resetToken: string): Promise<void> {
+    if (env.SMTP_AUTH_DISABLED) {
+      logger.warn({ to }, 'SMTP disabled; skipping password reset email');
+      return;
+    }
+    const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const html = this.compileTemplate('password-reset', { resetUrl });
+    await this.transporter.sendMail({
+      from: env.SMTP_SENDER_EMAIL,
+      to,
+      subject: 'Redefinição de senha - Turbofy',
+      html,
+    });
+    logger.info({ to }, 'Password reset email sent');
   }
 }

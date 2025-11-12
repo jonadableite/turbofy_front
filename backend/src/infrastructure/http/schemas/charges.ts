@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { ChargeMethod, ChargeStatus } from "../../../domain/entities/Charge";
 
-export const ChargeMethodSchema = z.enum(["PIX", "BOLETO"]);
+export const ChargeMethodSchema = z.nativeEnum(ChargeMethod);
 
-export const ChargeStatusSchema = z.enum(["PENDING", "PAID", "EXPIRED", "CANCELED"]);
+export const ChargeStatusSchema = z.nativeEnum(ChargeStatus);
 
 const SplitSchema = z.object({
   merchantId: z.string().uuid({ message: "merchantId must be a valid UUID" }),

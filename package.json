@@ -5,17 +5,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "sst dev",
-    "build": "sst build",
-    "deploy": "sst deploy",
-    "remove": "sst remove"
-  },
-  "pnpm": {
-    "workspaces": [
-      "backend",
-      "frontend",
-      "infrastructure"
-    ]
+    "dev": "pnpm dlx sst dev",
+    "build": "pnpm run backend:build",
+    "backend:build": "pnpm -C backend build",
+    "frontend:build": "pnpm -C frontend build",
+    "infra:build": "pnpm dlx sst build",
+    "deploy": "pnpm dlx sst deploy",
+    "remove": "pnpm dlx sst remove"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +19,7 @@
   "packageManager": "pnpm@10.20.0",
   "devDependencies": {
     "@types/node": "^24.10.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "sst": "^2.30.2"
   }
 }

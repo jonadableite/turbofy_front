@@ -86,6 +86,81 @@ const options = {
             refreshToken: { type: 'string' },
           },
         },
+        CreateReconciliationRequest: {
+          type: 'object',
+          properties: {
+            merchantId: { type: 'string', format: 'uuid' },
+            startDate: { type: 'string', format: 'date-time' },
+            endDate: { type: 'string', format: 'date-time' },
+            type: { type: 'string', enum: ['AUTOMATIC', 'MANUAL'] },
+            metadata: { type: 'object', additionalProperties: true },
+          },
+          required: ['merchantId', 'startDate', 'endDate', 'type'],
+        },
+        CreateReconciliationResponse: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            merchantId: { type: 'string', format: 'uuid' },
+            type: { type: 'string', enum: ['AUTOMATIC', 'MANUAL'] },
+            status: { type: 'string', enum: ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'PARTIAL'] },
+            startDate: { type: 'string', format: 'date-time' },
+            endDate: { type: 'string', format: 'date-time' },
+            matchesCount: { type: 'integer' },
+            unmatchedChargesCount: { type: 'integer' },
+            unmatchedTransactionsCount: { type: 'integer' },
+            totalAmountCents: { type: 'integer' },
+            matchedAmountCents: { type: 'integer' },
+            matchRate: { type: 'number' },
+            processedAt: { type: 'string', format: 'date-time', nullable: true },
+            failureReason: { type: 'string', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+          required: ['id','merchantId','type','status','startDate','endDate','createdAt','updatedAt'],
+        },
+        CreateSettlementRequest: {
+          type: 'object',
+          properties: {
+            merchantId: { type: 'string', format: 'uuid' },
+            amountCents: { type: 'integer', minimum: 1 },
+            currency: { type: 'string', enum: ['BRL'], default: 'BRL' },
+            bankAccountId: { type: 'string' },
+            scheduledFor: { type: 'string', format: 'date-time' },
+            metadata: { type: 'object', additionalProperties: true },
+          },
+          required: ['merchantId','amountCents','currency','bankAccountId'],
+        },
+        CreateSettlementResponse: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            merchantId: { type: 'string', format: 'uuid' },
+            amountCents: { type: 'integer' },
+            currency: { type: 'string', enum: ['BRL'] },
+            status: { type: 'string', enum: ['PENDING','SCHEDULED','PROCESSING','COMPLETED','FAILED','CANCELED'] },
+            scheduledFor: { type: 'string', format: 'date-time', nullable: true },
+            bankAccountId: { type: 'string', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+          required: ['id','merchantId','amountCents','currency','status','createdAt','updatedAt'],
+        },
+        ProcessSettlementResponse: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            merchantId: { type: 'string', format: 'uuid' },
+            amountCents: { type: 'integer' },
+            currency: { type: 'string', enum: ['BRL'] },
+            status: { type: 'string', enum: ['PENDING','SCHEDULED','PROCESSING','COMPLETED','FAILED','CANCELED'] },
+            transactionId: { type: 'string', nullable: true },
+            processedAt: { type: 'string', format: 'date-time', nullable: true },
+            failureReason: { type: 'string', nullable: true },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+          required: ['id','merchantId','amountCents','currency','status','updatedAt'],
+        },
       },
     },
     paths: {
@@ -188,6 +263,97 @@ const options = {
             400: { description: 'Entrada inválida' },
             401: { description: 'OTP inválido/expirado' },
             429: { description: 'Bloqueado por excesso de tentativas' },
+          },
+        },
+      },
+      '/reconciliations': {
+        post: {
+          summary: 'Executar conciliação (AUTOMATIC ou MANUAL)',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/CreateReconciliationRequest' },
+                examples: {
+                  automatic: {
+                    value: {
+                      merchantId: '8a29e7a2-7b91-4b7a-9b3e-3a0f3d2b1d55',
+                      startDate: '2024-01-01T00:00:00.000Z',
+                      endDate: '2024-01-31T23:59:59.999Z',
+                      type: 'AUTOMATIC',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: 'Conciliação criada e processada',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/CreateReconciliationResponse' },
+                },
+              },
+            },
+            400: { description: 'Erro de validação' },
+            500: { description: 'Erro interno' },
+          },
+        },
+      },
+      '/settlements': {
+        post: {
+          summary: 'Criar repasse (settlement)',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/CreateSettlementRequest' },
+                examples: {
+                  default: {
+                    value: {
+                      merchantId: '8a29e7a2-7b91-4b7a-9b3e-3a0f3d2b1d55',
+                      amountCents: 10000,
+                      currency: 'BRL',
+                      bankAccountId: 'acc-123',
+                      scheduledFor: '2024-02-01T12:00:00.000Z',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: 'Repasse criado',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/CreateSettlementResponse' },
+                },
+              },
+            },
+            400: { description: 'Erro de validação' },
+            500: { description: 'Erro interno' },
+          },
+        },
+      },
+      '/settlements/{id}/process': {
+        post: {
+          summary: 'Processar repasse',
+          parameters: [
+            { in: 'path', name: 'id', required: true, schema: { type: 'string', format: 'uuid' } },
+          ],
+          responses: {
+            200: {
+              description: 'Repasse processado',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ProcessSettlementResponse' },
+                },
+              },
+            },
+            400: { description: 'Erro de validação' },
+            500: { description: 'Erro interno' },
           },
         },
       },

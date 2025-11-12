@@ -31,7 +31,7 @@ exports.chargesRouter.post("/", async (req, res) => {
         const methodEnum = parsed.method
             ? (parsed.method === "PIX" ? Charge_1.ChargeMethod.PIX : Charge_1.ChargeMethod.BOLETO)
             : undefined;
-        const { charge } = await useCase.execute({
+        const result = await useCase.execute({
             idempotencyKey: req.header("X-Idempotency-Key"),
             merchantId: parsed.merchantId,
             amountCents: parsed.amountCents,
@@ -41,8 +41,11 @@ exports.chargesRouter.post("/", async (req, res) => {
             expiresAt: parsed.expiresAt ? new Date(parsed.expiresAt) : undefined,
             externalRef: parsed.externalRef,
             metadata: parsed.metadata,
+            splits: parsed.splits,
+            fees: parsed.fees,
         });
-        const response = charges_1.CreateChargeResponseSchema.parse({
+        const { charge, splits, fees } = result;
+        const responseData = {
             id: charge.id,
             merchantId: charge.merchantId,
             amountCents: charge.amountCents,
@@ -58,7 +61,25 @@ exports.chargesRouter.post("/", async (req, res) => {
             boleto: charge.boletoUrl ? { boletoUrl: charge.boletoUrl, expiresAt: (charge.expiresAt ?? new Date()).toISOString() } : undefined,
             createdAt: charge.createdAt.toISOString(),
             updatedAt: charge.updatedAt.toISOString(),
-        });
+        };
+        // Add splits and fees if present
+        if (splits && splits.length > 0) {
+            responseData.splits = splits.map((split) => ({
+                id: split.id,
+                merchantId: split.merchantId,
+                amountCents: split.amountCents ?? split.computeAmountForTotal(charge.amountCents),
+                percentage: split.percentage,
+            }));
+        }
+        if (fees && fees.length > 0) {
+            responseData.fees = fees.map((fee) => ({
+                id: fee.id,
+                type: fee.type,
+                amountCents: fee.amountCents,
+            }));
+        }
+        // Validate response with schema (now supports splits and fees)
+        const response = charges_1.CreateChargeResponseSchema.parse(responseData);
         res.status(201).json(response);
     }
     catch (err) {

@@ -3,6 +3,7 @@ import { CreateReconciliationRequestSchema } from "../schemas/reconciliations";
 import { ZodError } from "zod";
 import { PrismaReconciliationRepository } from "../../database/PrismaReconciliationRepository";
 import { PrismaChargeRepository } from "../../database/PrismaChargeRepository";
+import { prisma } from "../../database/prismaClient";
 import { InMemoryMessagingAdapter } from "../../adapters/messaging/InMemoryMessagingAdapter";
 import { RunReconciliation } from "../../../application/useCases/RunReconciliation";
 import { ReconciliationType } from "../../../domain/entities/Reconciliation";
@@ -14,7 +15,7 @@ reconciliationsRouter.post("/", async (req: Request, res: Response) => {
   try {
     const parsed = CreateReconciliationRequestSchema.parse(req.body);
 
-    const reconciliationRepository = new PrismaReconciliationRepository();
+    const reconciliationRepository = new PrismaReconciliationRepository(prisma);
     const chargeRepository = new PrismaChargeRepository();
     const messaging = new InMemoryMessagingAdapter();
 

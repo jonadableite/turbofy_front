@@ -1,4 +1,4 @@
-import { Payment } from "../../domain/entities/Payment";
+import { Payment, PaymentStatus } from "../../domain/entities/Payment";
 
 export interface PaymentRepository {
   save(payment: Payment): Promise<Payment>;
@@ -8,12 +8,12 @@ export interface PaymentRepository {
     options?: {
       limit?: number;
       offset?: number;
-      status?: string;
+      status?: PaymentStatus;
     }
   ): Promise<Payment[]>;
   update(payment: Payment): Promise<Payment>;
   countByMerchantId(
     merchantId: string,
-    options?: { status?: string }
+    options?: { status?: PaymentStatus }
   ): Promise<number>;
 }

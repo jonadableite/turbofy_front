@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: turbofy-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: c4102143751b6e25d238
+      POSTGRES_DB: turbofy
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: turbofy-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: turbofy-mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: turbofy-backend:dev
+    container_name: turbofy-backend
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      DATABASE_URL: postgresql://postgres:c4102143751b6e25d238@postgres:5432/turbofy?schema=public
+      RABBITMQ_URI: amqp://guest:guest@rabbitmq:5672
+      JWT_SECRET: 2bcbf1e3c8f74a2c921f6b3498e5b1e2b6c9983a40f8bfb204bfeac3c8c5e9a2
+      SMTP_HOST: mailhog
+      SMTP_PORT: "1025"
+      SMTP_USERNAME: dev
+      SMTP_PASSWORD: dev
+      SMTP_SENDER_EMAIL: no-reply@local.test
+      SMTP_AUTH_DISABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: turbofy-frontend:dev
+    container_name: turbofy-frontend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

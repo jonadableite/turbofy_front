@@ -26,6 +26,8 @@ const env_1 = require("./config/env");
 const prismaClient_1 = require("./infrastructure/database/prismaClient");
 const swagger_1 = require("./infrastructure/http/swagger");
 const chargesRoutes_1 = require("./infrastructure/http/routes/chargesRoutes");
+const settlementsRoutes_1 = require("./infrastructure/http/routes/settlementsRoutes");
+const reconciliationsRoutes_1 = require("./infrastructure/http/routes/reconciliationsRoutes");
 const app = (0, express_1.default)();
 exports.app = app;
 // Middlewares
@@ -57,6 +59,8 @@ app.get("/healthz", async (_, res) => {
 });
 app.use('/auth', authRoutes_1.authRouter);
 app.use('/charges', chargesRoutes_1.chargesRouter);
+app.use('/settlements', settlementsRoutes_1.settlementsRouter);
+app.use('/reconciliations', reconciliationsRoutes_1.reconciliationsRouter);
 // TODO: Register domain routers here (payments, merchants etc.)
 // Swagger docs
 (0, swagger_1.setupSwagger)(app);

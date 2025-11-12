@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 export enum PaymentStatus {
   PENDING = "PENDING",
@@ -47,7 +47,7 @@ export class Payment {
   private _method: PaymentMethod;
 
   constructor(props: PaymentProps) {
-    this.id = props.id || uuidv4();
+    this.id = props.id || randomUUID();
     this.amount = props.amount;
     this.description = props.description;
     this.merchantId = props.merchantId;

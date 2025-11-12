@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { AuthService, registerSchema, loginSchema } from '../../../application/services/AuthService';
 import { z } from 'zod';
@@ -8,6 +8,8 @@ import { prisma } from '../../database/prismaClient';
 import { EmailService } from '../../email/EmailService';
 import { logger } from '../../logger';
 import { trace } from '@opentelemetry/api';
+import { verifyRecaptcha } from '../../security/recaptcha';
+import { generateCsrfToken } from '../../security/csrf';
 
 const authRouter = Router();
 const authService = new AuthService();
@@ -72,11 +74,44 @@ async function recordSuccess(email: string, ip: string) {
   await prisma.authAttempt.deleteMany({ where: { email, ip } }).catch(() => {});
 }
 
-authRouter.post('/register', authLimiter, async (req, res) => {
+authRouter.post('/register', authLimiter, async (req: Request, res: Response) => {
+  const ip = req.ip || 'unknown';
   try {
-    const input = registerSchema.parse(req.body);
+    // Validar reCAPTCHA se fornecido
+    const { recaptchaToken, ...inputData } = req.body as { recaptchaToken?: string } & z.infer<typeof registerSchema>;
+    if (recaptchaToken) {
+      const isValid = await verifyRecaptcha(recaptchaToken, ip);
+      if (!isValid) {
+        return res.status(400).json({ error: 'reCAPTCHA validation failed' });
+      }
+    }
+
+    const input = registerSchema.parse(inputData);
     const tokens = await authService.register(input);
-    res.status(201).json(tokens);
+
+    // Configurar HttpOnly cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: isProduction, // HTTPS only em produção
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutos
+      path: '/',
+    });
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+      path: '/',
+    });
+
+    res.status(201).json({ 
+      accessToken: tokens.accessToken, 
+      refreshToken: tokens.refreshToken,
+      expiresIn: 15 * 60, // 15 minutos em segundos
+    });
   } catch (err) {
     if (err instanceof z.ZodError) {
       // Use issues for cross-version compatibility
@@ -87,11 +122,44 @@ authRouter.post('/register', authLimiter, async (req, res) => {
   }
 });
 
-authRouter.post('/login', authLimiter, async (req, res) => {
+authRouter.post('/login', authLimiter, async (req: Request, res: Response) => {
+  const ip = req.ip || 'unknown';
   try {
-    const input = loginSchema.parse(req.body);
-    const tokens = await authService.login(input);
-    res.status(200).json(tokens);
+    // Validar reCAPTCHA se fornecido
+    const { recaptchaToken, ...inputData } = req.body as { recaptchaToken?: string } & z.infer<typeof loginSchema>;
+    if (recaptchaToken) {
+      const isValid = await verifyRecaptcha(recaptchaToken, ip);
+      if (!isValid) {
+        return res.status(400).json({ error: 'reCAPTCHA validation failed' });
+      }
+    }
+
+    const input = loginSchema.parse(inputData);
+    const tokens = await authService.login(input, ip);
+
+    // Configurar HttpOnly cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: isProduction, // HTTPS only em produção
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutos
+      path: '/',
+    });
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+      path: '/',
+    });
+
+    res.status(200).json({ 
+      accessToken: tokens.accessToken, 
+      refreshToken: tokens.refreshToken,
+      expiresIn: 15 * 60, // 15 minutos em segundos
+    });
   } catch (err) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ issues: err.issues });
@@ -203,6 +271,80 @@ authRouter.post('/mfa/verify', authLimiter, async (req, res) => {
     const message = err instanceof Error ? err.message : 'Unauthorized';
     logger.error({ err }, 'MFA verification failed');
     return res.status(401).json({ error: message });
+  }
+});
+
+// Forgot Password: generate reset token, store hash + 1h expiry, send email
+const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+  recaptchaToken: z.string().optional(),
+});
+
+authRouter.post('/forgot-password', authLimiter, async (req: Request, res: Response) => {
+  const ip = req.ip || 'unknown';
+  try {
+    const { email, recaptchaToken } = forgotPasswordSchema.parse(req.body);
+
+    // Validar reCAPTCHA se fornecido
+    if (recaptchaToken) {
+      const isValid = await verifyRecaptcha(recaptchaToken, ip);
+      if (!isValid) {
+        return res.status(400).json({ error: 'reCAPTCHA validation failed' });
+      }
+    }
+
+    await checkLock(email, ip);
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    // Avoid user enumeration: always respond 200, only proceed internally if user exists
+    if (user) {
+      const span = tracer.startSpan('auth.forgot-password');
+      try {
+        span.setAttribute('auth.email', email);
+        
+        // Gerar token de reset (32 bytes = 64 hex chars)
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const tokenHash = await bcrypt.hash(resetToken, 12);
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+        // Armazenar token no banco
+        await prisma.passwordResetToken.create({
+          data: {
+            userId: user.id,
+            tokenHash,
+            expiresAt,
+          },
+        });
+
+        // Enviar email com link de reset
+        await emailService.sendPasswordResetEmail(email, resetToken);
+        
+        logger.info({ email, userId: user.id }, 'Password reset token generated and email sent');
+        span.addEvent('auth.forgot-password.token_generated');
+      } catch (error) {
+        logger.error({ error, email }, 'Error generating password reset token');
+        span.addEvent('auth.forgot-password.error');
+      } finally {
+        span.end();
+      }
+      await recordSuccess(email, ip);
+    }
+
+    // Sempre retornar sucesso para evitar user enumeration
+    return res.status(200).json({ 
+      status: 'ok',
+      message: 'If the email exists, a password reset link has been sent.',
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ issues: err.issues });
+    }
+    if (err instanceof Error && /locked/i.test(err.message)) {
+      return res.status(429).json({ error: err.message });
+    }
+    logger.error({ err }, 'Forgot password request failed');
+    await recordFailure((req.body?.email as string) ?? 'unknown', ip);
+    return res.status(400).json({ error: 'Unable to process password reset request' });
   }
 });
 

@@ -6,7 +6,7 @@ export const CreateSettlementRequestSchema = z.object({
   currency: z.string().length(3).default("BRL"),
   bankAccountId: z.string().uuid("bankAccountId must be a valid UUID"),
   scheduledFor: z.string().datetime().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const ProcessSettlementRequestSchema = z.object({

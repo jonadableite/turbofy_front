@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -103,7 +103,7 @@
 <a name='L38'></a><a href='#L38'>38</a>
 <a name='L39'></a><a href='#L39'>39</a>
 <a name='L40'></a><a href='#L40'>40</a>
-<a name='L41'></a><a href='#L41'>41</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L41'></a><a href='#L41'>41</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -113,7 +113,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -121,29 +121,29 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { v4 as uuidv4 } from "uuid";</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { randomUUID } from "crypto";
 &nbsp;
 export interface FeeProps {
   id?: string;
@@ -153,35 +153,35 @@ export interface FeeProps {
   createdAt?: Date;
 }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export class F</span>ee {
+export class Fee {
   readonly id: string;
   readonly chargeId: string;
   readonly type: string;
   readonly amountCents: number;
   readonly createdAt: Date;
 &nbsp;
-<span class="fstat-no" title="function not covered" >  constructor(p</span>rops: FeeProps) {
-<span class="cstat-no" title="statement not covered" >    this.id = props.id || uuidv4();</span>
-<span class="cstat-no" title="statement not covered" >    this.chargeId = props.chargeId;</span>
-<span class="cstat-no" title="statement not covered" >    this.type = props.type;</span>
-<span class="cstat-no" title="statement not covered" >    this.createdAt = props.createdAt || new Date();</span>
+  constructor(props: FeeProps) {
+    this.id = props.id || randomUUID();
+    this.chargeId = props.chargeId;
+    this.type = props.type;
+    this.createdAt = props.createdAt || new Date();
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!props.type || props.type.trim().length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error("Fee.type é obrigatório");</span>
+    if (!props.type || props.type.trim().length === 0) {
+      throw new Error("Fee.type é obrigatório");
     }
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!Number.isInteger(props.amountCents) || props.amountCents &lt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error("Fee.amountCents deve ser inteiro e &gt;= 0");</span>
+    if (!Number.isInteger(props.amountCents) || props.amountCents &lt; 0) {
+      throw new Error("Fee.amountCents deve ser inteiro e &gt;= 0");
     }
-<span class="cstat-no" title="statement not covered" >    this.amountCents = props.amountCents;</span>
+    this.amountCents = props.amountCents;
   }
 &nbsp;
   // Retorna o total após desconto da taxa
-<span class="fstat-no" title="function not covered" >  applyToTotal(</span>totalAmountCents: number): number {
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!Number.isInteger(totalAmountCents) || totalAmountCents &lt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Error("Total inválido para aplicação de taxa");</span>
+  applyToTotal(totalAmountCents: number): number {
+    if (!Number.isInteger(totalAmountCents) || totalAmountCents &lt; 0) {
+      throw new Error("Total inválido para aplicação de taxa");
     }
-    const result = <span class="cstat-no" title="statement not covered" >totalAmountCents - this.amountCents;</span>
-<span class="cstat-no" title="statement not covered" >    return result &lt; 0 ? 0 : result;</span>
+    const result = totalAmountCents - this.amountCents;
+    return result &lt; 0 ? 0 : result;
   }
 }</pre></td></tr></table></pre>
 
@@ -190,7 +190,7 @@ export interface FeeProps {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-11T06:18:39.245Z
+                at 2025-11-12T01:37:51.764Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

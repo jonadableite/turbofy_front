@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import {
   Reconciliation,
   ReconciliationStatus,
@@ -6,14 +6,18 @@ import {
   ReconciliationMatch,
 } from "../../domain/entities/Reconciliation";
 import { ReconciliationRepository } from "../../ports/ReconciliationRepository";
-import { prisma } from "./prismaClient";
+// Use constructor-injected PrismaClient for better testability and to avoid global coupling
 
 function mapPrismaReconciliationToDomain(model: any): Reconciliation {
-  const matches = model.matches
-    ? (model.matches as ReconciliationMatch[])
-    : [];
-  const unmatchedCharges = model.unmatchedCharges || [];
-  const unmatchedTransactions = model.unmatchedTransactions || [];
+  const rawMatches = Array.isArray(model.matches) ? (model.matches as any[]) : [];
+  const matches: ReconciliationMatch[] = rawMatches.map((m: any) => ({
+    chargeId: String(m.chargeId),
+    amountCents: Number(m.amountCents),
+    transactionId: String(m.transactionId),
+    matchedAt: new Date(String(m.matchedAt)),
+  }));
+  const unmatchedCharges: string[] = Array.isArray(model.unmatchedCharges) ? model.unmatchedCharges : [];
+  const unmatchedTransactions: string[] = Array.isArray(model.unmatchedTransactions) ? model.unmatchedTransactions : [];
 
   return new Reconciliation({
     id: model.id,
@@ -36,18 +40,16 @@ function mapPrismaReconciliationToDomain(model: any): Reconciliation {
 }
 
 export class PrismaReconciliationRepository implements ReconciliationRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
   async findById(id: string): Promise<Reconciliation | null> {
-    const found = await prisma.reconciliation.findUnique({ where: { id } });
+    const found = await this.prisma.reconciliation.findUnique({ where: { id } });
     return found ? mapPrismaReconciliationToDomain(found) : null;
   }
 
-  async findByMerchantId(merchantId: string, status?: string): Promise<Reconciliation[]> {
-    const where: Prisma.ReconciliationWhereInput = { merchantId };
-    if (status) {
-      where.status = status as Prisma.ReconciliationStatus;
-    }
-    const found = await prisma.reconciliation.findMany({
-      where,
+  async findByMerchantId(merchantId: string, status?: ReconciliationStatus): Promise<Reconciliation[]> {
+    const found = await this.prisma.reconciliation.findMany({
+      where: status ? { merchantId, status } : { merchantId },
       orderBy: { createdAt: "desc" },
     });
     return found.map(mapPrismaReconciliationToDomain);
@@ -58,7 +60,7 @@ export class PrismaReconciliationRepository implements ReconciliationRepository 
     startDate: Date,
     endDate: Date
   ): Promise<Reconciliation[]> {
-    const found = await prisma.reconciliation.findMany({
+    const found = await this.prisma.reconciliation.findMany({
       where: {
         merchantId,
         OR: [
@@ -74,7 +76,7 @@ export class PrismaReconciliationRepository implements ReconciliationRepository 
   }
 
   async create(reconciliation: Reconciliation): Promise<Reconciliation> {
-    const created = await prisma.reconciliation.create({
+    const created = await this.prisma.reconciliation.create({
       data: {
         id: reconciliation.id,
         merchantId: reconciliation.merchantId,
@@ -82,38 +84,50 @@ export class PrismaReconciliationRepository implements ReconciliationRepository 
         status: reconciliation.status,
         startDate: reconciliation.startDate,
         endDate: reconciliation.endDate,
-        matches: reconciliation.matches ? (reconciliation.matches as Prisma.InputJsonValue) : null,
-        unmatchedCharges: reconciliation.unmatchedCharges,
-        unmatchedTransactions: reconciliation.unmatchedTransactions,
+        matches: (reconciliation.matches || []).map(m => ({
+          chargeId: m.chargeId,
+          amountCents: m.amountCents,
+          transactionId: m.transactionId,
+          matchedAt: m.matchedAt.toISOString(),
+        })) as Prisma.InputJsonValue,
+        ...(reconciliation.unmatchedCharges.length
+          ? { unmatchedCharges: Array.from(reconciliation.unmatchedCharges) }
+          : {}),
+        ...(reconciliation.unmatchedTransactions.length
+          ? { unmatchedTransactions: Array.from(reconciliation.unmatchedTransactions) }
+          : {}),
         totalAmountCents: reconciliation.totalAmountCents,
         matchedAmountCents: reconciliation.matchedAmountCents,
         failureReason: reconciliation.failureReason ?? null,
         processedAt: reconciliation.processedAt ?? null,
-        metadata: reconciliation.metadata
-          ? (reconciliation.metadata as Prisma.InputJsonValue)
-          : null,
+        ...(reconciliation.metadata !== undefined
+          ? { metadata: reconciliation.metadata as Prisma.InputJsonValue }
+          : {}),
       },
     });
     return mapPrismaReconciliationToDomain(created);
   }
 
   async update(reconciliation: Reconciliation): Promise<Reconciliation> {
-    const updated = await prisma.reconciliation.update({
+    const updated = await this.prisma.reconciliation.update({
       where: { id: reconciliation.id },
       data: {
         status: reconciliation.status,
-        matches: reconciliation.matches
-          ? (reconciliation.matches as Prisma.InputJsonValue)
-          : null,
-        unmatchedCharges: reconciliation.unmatchedCharges,
-        unmatchedTransactions: reconciliation.unmatchedTransactions,
+        matches: (reconciliation.matches || []).map(m => ({
+          chargeId: m.chargeId,
+          amountCents: m.amountCents,
+          transactionId: m.transactionId,
+          matchedAt: m.matchedAt.toISOString(),
+        })) as Prisma.InputJsonValue,
+        unmatchedCharges: Array.from(reconciliation.unmatchedCharges),
+        unmatchedTransactions: Array.from(reconciliation.unmatchedTransactions),
         totalAmountCents: reconciliation.totalAmountCents,
         matchedAmountCents: reconciliation.matchedAmountCents,
         failureReason: reconciliation.failureReason ?? null,
         processedAt: reconciliation.processedAt ?? null,
-        metadata: reconciliation.metadata
-          ? (reconciliation.metadata as Prisma.InputJsonValue)
-          : null,
+        ...(reconciliation.metadata !== undefined
+          ? { metadata: reconciliation.metadata as Prisma.InputJsonValue }
+          : {}),
       },
     });
     return mapPrismaReconciliationToDomain(updated);

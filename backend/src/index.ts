@@ -17,7 +17,9 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import pinoHttp from "pino-http";
 import { logger } from "./infrastructure/logger";
+import chalk from "chalk";
 import { authRouter } from "./infrastructure/http/routes/authRoutes";
+import { apiRouter } from "./infrastructure/http/routes/apiRoutes";
 import { env } from "./config/env";
 import { prisma } from "./infrastructure/database/prismaClient";
 import { setupSwagger } from "./infrastructure/http/swagger";
@@ -33,11 +35,58 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGIN || "*", // TODO: restrict in production
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key", "X-Idempotency-Key"],
+    allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key", "X-Idempotency-Key", "X-CSRF-Token"],
+    credentials: true, // Permitir cookies (necessário para HttpOnly cookies)
   })
 );
 app.use(express.json());
-app.use(pinoHttp({ logger }));
+
+// Custom HTTP logger com formatação melhorada
+app.use(
+  pinoHttp({
+    logger,
+    customLogLevel: (req, res, err) => {
+      if (res.statusCode >= 500 || err) return 'error';
+      if (res.statusCode >= 400) return 'warn';
+      if (res.statusCode >= 300) return 'info';
+      return 'info';
+    },
+    serializers: {
+      req: (req) => ({
+        method: req.method,
+        url: req.url,
+        // Mostrar apenas headers relevantes
+        headers: {
+          'user-agent': req.headers['user-agent'],
+          'content-type': req.headers['content-type'],
+          'authorization': req.headers['authorization'] ? '***REDACTED***' : undefined,
+        },
+        remoteAddress: req.remoteAddress,
+      }),
+      res: (res) => ({
+        statusCode: res.statusCode,
+      }),
+    },
+    customSuccessMessage: (req, res) => {
+      const method = req.method;
+      const url = req.url;
+      const status = res.statusCode;
+      const time = res.responseTime ? `${res.responseTime}ms` : '';
+      
+      // Emojis e cores baseados no status
+      let emoji = '✅';
+      if (status >= 500) emoji = '❌';
+      else if (status >= 400) emoji = '⚠️';
+      else if (status >= 300) emoji = '↩️';
+      
+      return `${emoji} ${method} ${url} → ${status} ${time}`;
+    },
+    customErrorMessage: (req, res, err) => {
+      return `❌ ${req.method} ${req.url} → ${res.statusCode} ERROR: ${err.message}`;
+    },
+  })
+);
+
 app.disable("x-powered-by");
 
 // Basic rate limiting ~ 100 req / 15 min per IP
@@ -60,6 +109,7 @@ app.get("/healthz", async (_, res) => {
   }
 });
 
+app.use('/api', apiRouter);
 app.use('/auth', authRouter);
 app.use('/charges', chargesRouter);
 app.use('/settlements', settlementsRouter);
@@ -73,8 +123,27 @@ const PORT = Number(env.PORT);
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    // eslint-disable-next-line no-console
-    console.log(`🚀 Turbofy API running on http://localhost:${PORT}`);
+    // Banner de inicialização melhorado
+    console.log('\n' + chalk.cyan('━'.repeat(60)));
+    console.log(chalk.bold.blue('  🚀 TURBOFY GATEWAY - API BACKEND'));
+    console.log(chalk.cyan('━'.repeat(60)));
+    console.log(chalk.green(`  ✓ Servidor:       http://localhost:${PORT}`));
+    console.log(chalk.green(`  ✓ Documentação:   http://localhost:${PORT}/docs`));
+    console.log(chalk.green(`  ✓ Health Check:   http://localhost:${PORT}/healthz`));
+    console.log(chalk.cyan('━'.repeat(60)));
+    console.log(chalk.yellow(`  📊 Ambiente:      ${env.NODE_ENV}`));
+    console.log(chalk.yellow(`  🔒 CORS Origin:   ${process.env.CORS_ORIGIN || '*'}`));
+    console.log(chalk.cyan('━'.repeat(60)));
+    console.log(chalk.magenta('  🎯 Endpoints Disponíveis:'));
+    console.log(chalk.white('     • POST /auth/register       - Criar conta'));
+    console.log(chalk.white('     • POST /auth/login          - Fazer login'));
+    console.log(chalk.white('     • POST /auth/forgot-password - Recuperar senha'));
+    console.log(chalk.white('     • GET  /api/auth/csrf       - Token CSRF'));
+    console.log(chalk.white('     • POST /charges             - Criar cobrança'));
+    console.log(chalk.cyan('━'.repeat(60)));
+    console.log(chalk.green.bold('  ✨ Servidor pronto para receber requisições!\n'));
+    
+    logger.info('🚀 Turbofy API iniciada com sucesso');
   });
 }
 

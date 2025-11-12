@@ -1,7 +1,7 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { Settlement, SettlementStatus } from "../../domain/entities/Settlement";
 import { SettlementRepository } from "../../ports/SettlementRepository";
-import { prisma } from "./prismaClient";
+// Use constructor-injected PrismaClient for better testability and to avoid global coupling
 
 function mapPrismaSettlementToDomain(model: any): Settlement {
   return new Settlement({
@@ -22,23 +22,23 @@ function mapPrismaSettlementToDomain(model: any): Settlement {
 }
 
 export class PrismaSettlementRepository implements SettlementRepository {
+  constructor(private readonly prisma: PrismaClient) {}
   async findById(id: string): Promise<Settlement | null> {
-    const found = await prisma.settlement.findUnique({ where: { id } });
+    const found = await this.prisma.settlement.findUnique({ where: { id } });
     return found ? mapPrismaSettlementToDomain(found) : null;
   }
 
-  async findByMerchantId(merchantId: string, status?: string): Promise<Settlement[]> {
-    const where: Prisma.SettlementWhereInput = { merchantId };
-    if (status) {
-      where.status = status as Prisma.SettlementStatus;
-    }
-    const found = await prisma.settlement.findMany({ where, orderBy: { createdAt: "desc" } });
+  async findByMerchantId(merchantId: string, status?: SettlementStatus): Promise<Settlement[]> {
+    const found = await this.prisma.settlement.findMany({
+      where: status ? { merchantId, status } : { merchantId },
+      orderBy: { createdAt: "desc" },
+    });
     return found.map(mapPrismaSettlementToDomain);
   }
 
   async findDueSettlements(): Promise<Settlement[]> {
     const now = new Date();
-    const found = await prisma.settlement.findMany({
+    const found = await this.prisma.settlement.findMany({
       where: {
         OR: [
           { status: SettlementStatus.PENDING },
@@ -54,7 +54,7 @@ export class PrismaSettlementRepository implements SettlementRepository {
   }
 
   async create(settlement: Settlement): Promise<Settlement> {
-    const created = await prisma.settlement.create({
+    const created = await this.prisma.settlement.create({
       data: {
         id: settlement.id,
         merchantId: settlement.merchantId,
@@ -66,14 +66,16 @@ export class PrismaSettlementRepository implements SettlementRepository {
         bankAccountId: settlement.bankAccountId ?? null,
         transactionId: settlement.transactionId ?? null,
         failureReason: settlement.failureReason ?? null,
-        metadata: settlement.metadata ? (settlement.metadata as Prisma.InputJsonValue) : null,
+        ...(settlement.metadata !== undefined
+          ? { metadata: settlement.metadata as Prisma.InputJsonValue }
+          : {}),
       },
     });
     return mapPrismaSettlementToDomain(created);
   }
 
   async update(settlement: Settlement): Promise<Settlement> {
-    const updated = await prisma.settlement.update({
+    const updated = await this.prisma.settlement.update({
       where: { id: settlement.id },
       data: {
         status: settlement.status,
@@ -82,7 +84,9 @@ export class PrismaSettlementRepository implements SettlementRepository {
         bankAccountId: settlement.bankAccountId ?? null,
         transactionId: settlement.transactionId ?? null,
         failureReason: settlement.failureReason ?? null,
-        metadata: settlement.metadata ? (settlement.metadata as Prisma.InputJsonValue) : null,
+        ...(settlement.metadata !== undefined
+          ? { metadata: settlement.metadata as Prisma.InputJsonValue }
+          : {}),
       },
     });
     return mapPrismaSettlementToDomain(updated);

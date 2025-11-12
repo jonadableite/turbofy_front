@@ -8,128 +8,143 @@ datasource db {
 }
 
 model Merchant {
-  id                String     @id @default(uuid())
-  name              String
-  email             String     @unique
-  document          String     @unique
-  active            Boolean    @default(true)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  payments          Payment[]
-  pixKeys           PixKey[]
-  charges           Charge[]
-  chargeSplits      ChargeSplit[]
-  settlements       Settlement[]
-  reconciliations   Reconciliation[]
-  balance           Decimal    @default(0)
-  fee               Decimal    @default(0)
-  bankAccount       BankAccount?
+  id              String           @id @default(uuid())
+  name            String
+  email           String           @unique
+  document        String           @unique
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  payments        Payment[]
+  pixKeys         PixKey[]
+  charges         Charge[]
+  chargeSplits    ChargeSplit[]
+  settlements     Settlement[]
+  reconciliations Reconciliation[]
+  balance         Decimal          @default(0)
+  fee             Decimal          @default(0)
+  bankAccount     BankAccount?
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  passwordHash  String
-  roles         String[]
-  document      String   @unique  // CPF ou CNPJ
-  phone         String?          // Telefone para SMS/WhatsApp MFA futuro
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  otps          UserOtp[]
-  tokens        UserToken[]
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  passwordHash        String
+  roles               String[]
+  document            String               @unique // CPF ou CNPJ
+  phone               String? // Telefone para SMS/WhatsApp MFA futuro
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  otps                UserOtp[]
+  tokens              UserToken[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model UserOtp {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  codeHash    String
-  expiresAt   DateTime
-  consumedAt  DateTime?
-  createdAt   DateTime @default(now())
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
 
   @@index([userId])
 }
 
 model UserToken {
-  id           String   @id @default(uuid())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  tokenHash    String   @unique
-  revokedAt    DateTime?
-  replacedBy   String?
-  createdAt    DateTime @default(now())
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  tokenHash  String    @unique
+  revokedAt  DateTime?
+  replacedBy String?
+  createdAt  DateTime  @default(now())
 
   @@index([userId])
 }
 
+model PasswordResetToken {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+}
+
 model AuthAttempt {
-  id           String   @id @default(uuid())
-  email        String
-  ip           String
-  count        Int      @default(0)
-  windowStart  DateTime @default(now())
-  lockedUntil  DateTime?
-  createdAt    DateTime @default(now())
+  id          String    @id @default(uuid())
+  email       String
+  ip          String
+  count       Int       @default(0)
+  windowStart DateTime  @default(now())
+  lockedUntil DateTime?
+  createdAt   DateTime  @default(now())
 
   @@unique([email, ip])
 }
 
 model Payment {
-  id                String     @id @default(uuid())
-  amount            Decimal
-  description       String
-  merchantId        String
-  merchant          Merchant   @relation(fields: [merchantId], references: [id])
-  status            String
-  method            String
-  customerEmail     String
-  customerName      String
-  customerDocument  String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  expiresAt         DateTime?
-  metadata          Json?
-  transactionId     String?
-  splitRules        SplitRule[]
+  id               String      @id @default(uuid())
+  amount           Decimal
+  description      String
+  merchantId       String
+  merchant         Merchant    @relation(fields: [merchantId], references: [id])
+  status           String
+  method           String
+  customerEmail    String
+  customerName     String
+  customerDocument String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  expiresAt        DateTime?
+  metadata         Json?
+  transactionId    String?
+  splitRules       SplitRule[]
 }
 
 model PixKey {
-  id                String     @id @default(uuid())
-  merchantId        String
-  merchant          Merchant   @relation(fields: [merchantId], references: [id])
-  type              String
-  key               String     @unique
-  description       String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  isActive          Boolean    @default(true)
+  id          String   @id @default(uuid())
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id])
+  type        String
+  key         String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
 }
 
 model BankAccount {
-  id                String     @id @default(uuid())
-  merchantId        String     @unique
-  merchant          Merchant   @relation(fields: [merchantId], references: [id])
-  bankName          String
-  bankCode          String
-  accountType       String
-  accountNumber     String
-  accountDigit      String
-  branchNumber      String
-  branchDigit       String?
-  document          String
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id            String   @id @default(uuid())
+  merchantId    String   @unique
+  merchant      Merchant @relation(fields: [merchantId], references: [id])
+  bankName      String
+  bankCode      String
+  accountType   String
+  accountNumber String
+  accountDigit  String
+  branchNumber  String
+  branchDigit   String?
+  document      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model SplitRule {
-  id                String     @id @default(uuid())
-  paymentId         String
-  payment           Payment    @relation(fields: [paymentId], references: [id])
-  merchantId        String
-  amount            Decimal
-  percentage        Decimal?
-  createdAt         DateTime   @default(now())
+  id         String   @id @default(uuid())
+  paymentId  String
+  payment    Payment  @relation(fields: [paymentId], references: [id])
+  merchantId String
+  amount     Decimal
+  percentage Decimal?
+  createdAt  DateTime @default(now())
 }
 
 /// ---------------------------------------
@@ -144,50 +159,50 @@ enum ChargeStatus {
 }
 
 model Charge {
-  id               String        @id @default(uuid())
-  merchantId       String
-  merchant         Merchant      @relation(fields: [merchantId], references: [id])
-  amountCents      Int
-  currency         String        @default("BRL")
-  description      String?
-  status           ChargeStatus  @default(PENDING)
-  method           String?                       // PIX ou BOLETO
-  expiresAt        DateTime?
-  idempotencyKey   String        @unique
-  externalRef      String?       @unique
-  metadata         Json?
-  pixQrCode        String?                       // dados base64 do QR Code
-  pixCopyPaste     String?                       // payload do código de copia e cola
-  boletoUrl        String?                       // URL/linha digitável do boleto
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  splits           ChargeSplit[]
-  fees             Fee[]
+  id             String        @id @default(uuid())
+  merchantId     String
+  merchant       Merchant      @relation(fields: [merchantId], references: [id])
+  amountCents    Int
+  currency       String        @default("BRL")
+  description    String?
+  status         ChargeStatus  @default(PENDING)
+  method         String? // PIX ou BOLETO
+  expiresAt      DateTime?
+  idempotencyKey String        @unique
+  externalRef    String?       @unique
+  metadata       Json?
+  pixQrCode      String? // dados base64 do QR Code
+  pixCopyPaste   String? // payload do código de copia e cola
+  boletoUrl      String? // URL/linha digitável do boleto
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  splits         ChargeSplit[]
+  fees           Fee[]
 
   @@index([merchantId])
 }
 
 model ChargeSplit {
-  id           String   @id @default(uuid())
-  chargeId     String
-  charge       Charge   @relation(fields: [chargeId], references: [id])
-  merchantId   String
-  merchant     Merchant @relation(fields: [merchantId], references: [id])
-  amountCents  Int
-  percentage   Decimal?
-  createdAt    DateTime @default(now())
+  id          String   @id @default(uuid())
+  chargeId    String
+  charge      Charge   @relation(fields: [chargeId], references: [id])
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id])
+  amountCents Int
+  percentage  Decimal?
+  createdAt   DateTime @default(now())
 
   @@index([chargeId])
   @@index([merchantId])
 }
 
 model Fee {
-  id           String   @id @default(uuid())
-  chargeId     String
-  charge       Charge   @relation(fields: [chargeId], references: [id])
-  type         String
-  amountCents  Int
-  createdAt    DateTime @default(now())
+  id          String   @id @default(uuid())
+  chargeId    String
+  charge      Charge   @relation(fields: [chargeId], references: [id])
+  type        String
+  amountCents Int
+  createdAt   DateTime @default(now())
 
   @@index([chargeId])
 }
@@ -206,20 +221,20 @@ enum SettlementStatus {
 }
 
 model Settlement {
-  id             String           @id @default(uuid())
-  merchantId     String
-  merchant       Merchant         @relation(fields: [merchantId], references: [id])
-  amountCents    Int
-  currency       String           @default("BRL")
-  status         SettlementStatus @default(PENDING)
-  scheduledFor   DateTime?
-  processedAt    DateTime?
-  bankAccountId  String?
-  transactionId  String?
-  failureReason  String?
-  metadata       Json?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id            String           @id @default(uuid())
+  merchantId    String
+  merchant      Merchant         @relation(fields: [merchantId], references: [id])
+  amountCents   Int
+  currency      String           @default("BRL")
+  status        SettlementStatus @default(PENDING)
+  scheduledFor  DateTime?
+  processedAt   DateTime?
+  bankAccountId String?
+  transactionId String?
+  failureReason String?
+  metadata      Json?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([merchantId])
   @@index([status])
@@ -244,23 +259,23 @@ enum ReconciliationType {
 }
 
 model Reconciliation {
-  id                    String                @id @default(uuid())
+  id                    String               @id @default(uuid())
   merchantId            String
-  merchant              Merchant              @relation(fields: [merchantId], references: [id])
+  merchant              Merchant             @relation(fields: [merchantId], references: [id])
   type                  ReconciliationType
-  status                ReconciliationStatus  @default(PENDING)
+  status                ReconciliationStatus @default(PENDING)
   startDate             DateTime
   endDate               DateTime
-  matches               Json?                 // Array de ReconciliationMatch
-  unmatchedCharges      String[]              @default([]) // Array de charge IDs
-  unmatchedTransactions String[]              @default([]) // Array de transaction IDs
-  totalAmountCents      Int                   @default(0)
-  matchedAmountCents    Int                   @default(0)
+  matches               Json? // Array de ReconciliationMatch
+  unmatchedCharges      String[]             @default([]) // Array de charge IDs
+  unmatchedTransactions String[]             @default([]) // Array de transaction IDs
+  totalAmountCents      Int                  @default(0)
+  matchedAmountCents    Int                  @default(0)
   failureReason         String?
   processedAt           DateTime?
   metadata              Json?
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 
   @@index([merchantId])
   @@index([status])

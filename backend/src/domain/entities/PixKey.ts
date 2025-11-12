@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 
 export enum PixKeyType {
   CPF = "CPF",
@@ -30,7 +30,7 @@ export class PixKey {
   private _isActive: boolean;
 
   constructor(props: PixKeyProps) {
-    this.id = props.id || uuidv4();
+    this.id = props.id || randomUUID();
     this.merchantId = props.merchantId;
     this.type = props.type;
     this.key = props.key;

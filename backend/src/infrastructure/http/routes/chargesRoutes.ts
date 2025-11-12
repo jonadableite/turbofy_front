@@ -30,10 +30,8 @@ chargesRouter.post("/", async (req: Request, res: Response) => {
 
     const useCase = new CreateCharge(chargeRepository, paymentProvider, messaging);
 
-    // Map method string to domain enum (type-safe)
-    const methodEnum: ChargeMethod | undefined = parsed.method
-      ? (parsed.method === "PIX" ? ChargeMethod.PIX : ChargeMethod.BOLETO)
-      : undefined;
+    // With nativeEnum, parsed.method is already a ChargeMethod
+    const methodEnum: ChargeMethod | undefined = parsed.method;
 
     const result = await useCase.execute({
       idempotencyKey: req.header("X-Idempotency-Key") as string,

@@ -10,7 +10,7 @@ const client_1 = require("@prisma/client");
 const Charge_1 = require("../../domain/entities/Charge");
 const ChargeSplit_1 = require("../../domain/entities/ChargeSplit");
 const Fee_1 = require("../../domain/entities/Fee");
-const prisma = new client_1.PrismaClient();
+const prismaClient_1 = require("./prismaClient");
 function mapPrismaChargeToDomain(model) {
     return new Charge_1.Charge({
         id: model.id,
@@ -33,17 +33,17 @@ function mapPrismaChargeToDomain(model) {
 }
 class PrismaChargeRepository {
     async findById(id) {
-        const found = await prisma.charge.findUnique({ where: { id } });
+        const found = await prismaClient_1.prisma.charge.findUnique({ where: { id } });
         return found ? mapPrismaChargeToDomain(found) : null;
     }
     async findByIdempotencyKey(idempotencyKey) {
-        const found = await prisma.charge.findUnique({ where: { idempotencyKey } });
+        const found = await prismaClient_1.prisma.charge.findUnique({ where: { idempotencyKey } });
         return found ? mapPrismaChargeToDomain(found) : null;
     }
     async create(charge) {
         // 🔐 SECURITY: Prisma automatically parameterizes queries, preventing SQL injection
         // 📈 SCALABILITY: Single transaction for charge creation
-        const created = await prisma.charge.create({
+        const created = await prismaClient_1.prisma.charge.create({
             data: {
                 id: charge.id,
                 merchantId: charge.merchantId,
@@ -66,7 +66,7 @@ class PrismaChargeRepository {
     async update(charge) {
         // 🔐 SECURITY: Type-safe update operations
         // 🛠️ MAINTAINABILITY: Only updates provided fields
-        const updated = await prisma.charge.update({
+        const updated = await prismaClient_1.prisma.charge.update({
             where: { id: charge.id },
             data: {
                 description: charge.description ?? null,
@@ -94,7 +94,7 @@ class PrismaChargeRepository {
         else {
             // If amountCents is not provided, calculate from percentage
             // Need to fetch charge to get total amount
-            const charge = await prisma.charge.findUnique({
+            const charge = await prismaClient_1.prisma.charge.findUnique({
                 where: { id: chargeId },
                 select: { amountCents: true }
             });
@@ -103,7 +103,7 @@ class PrismaChargeRepository {
             }
             amountCents = split.computeAmountForTotal(charge.amountCents);
         }
-        const created = await prisma.chargeSplit.create({
+        const created = await prismaClient_1.prisma.chargeSplit.create({
             data: {
                 id: split.id,
                 chargeId,
@@ -122,7 +122,7 @@ class PrismaChargeRepository {
         });
     }
     async addFee(chargeId, fee) {
-        const created = await prisma.fee.create({
+        const created = await prismaClient_1.prisma.fee.create({
             data: {
                 id: fee.id,
                 chargeId,

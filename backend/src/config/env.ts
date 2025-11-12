@@ -25,6 +25,8 @@ const envSchema = z.object({
   SMTP_PASSWORD: z.string().nonempty(),
   SMTP_SENDER_EMAIL: z.string().nonempty(),
   SMTP_AUTH_DISABLED: z.string().default('false').transform((v) => v === 'true'),
+  RECAPTCHA_SECRET_KEY: z.string().optional(), // Opcional para desenvolvimento
+  FRONTEND_URL: z.string().url().default("http://localhost:3001"), // URL do frontend para links de email
 });
 
 const _env = envSchema.safeParse(process.env);

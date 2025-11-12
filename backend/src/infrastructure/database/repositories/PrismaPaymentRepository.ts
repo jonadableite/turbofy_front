@@ -46,7 +46,7 @@ export class PrismaPaymentRepository implements PaymentRepository {
     options?: {
       limit?: number;
       offset?: number;
-      status?: string;
+      status?: PaymentStatus;
     }
   ): Promise<Payment[]> {
     const { limit = 10, offset = 0, status } = options || {};
@@ -80,7 +80,7 @@ export class PrismaPaymentRepository implements PaymentRepository {
 
   async countByMerchantId(
     merchantId: string,
-    options?: { status?: string }
+    options?: { status?: PaymentStatus }
   ): Promise<number> {
     const { status } = options || {};
 
