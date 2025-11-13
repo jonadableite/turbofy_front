@@ -51,20 +51,20 @@ export const RevenueChart = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
       className={cn(
-        "rounded-xl border border-border bg-card p-6 shadow-lg",
+        "rounded-xl border border-border/50 glass p-6 shadow-lg",
         className
       )}
     >
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2">
+          <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-primary/20 backdrop-blur-sm p-2 border border-primary/30">
             <TrendingUp className="h-5 w-5 text-primary" />
           </div>
           <h2 className="text-xl font-bold text-foreground">
-            Histórico de Faturamento
+            Vendas dia a dia
           </h2>
         </div>
-        <select className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+        <select className="rounded-md border border-border/50 glass px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
           <option>{period}</option>
           <option>Último mês</option>
           <option>Últimos 3 meses</option>
@@ -74,7 +74,7 @@ export const RevenueChart = ({
 
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
           <XAxis
             dataKey="date"
             tickFormatter={formatDate}
@@ -91,6 +91,8 @@ export const RevenueChart = ({
               backgroundColor: "hsl(var(--card))",
               border: "1px solid hsl(var(--border))",
               borderRadius: "8px",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
             }}
             formatter={(value: number) => formatCurrency(value)}
             labelFormatter={(label) => `Data: ${formatDate(label)}`}
@@ -99,11 +101,11 @@ export const RevenueChart = ({
           <Line
             type="monotone"
             dataKey="revenue"
-            stroke="hsl(var(--primary))"
+            stroke="hsl(142 71% 45%)"
             strokeWidth={3}
-            dot={{ fill: "hsl(var(--primary))", r: 4 }}
+            dot={{ fill: "hsl(142 71% 45%)", r: 4 }}
             activeDot={{ r: 6 }}
-            name="Faturamento"
+            name="Vendas"
           />
         </LineChart>
       </ResponsiveContainer>

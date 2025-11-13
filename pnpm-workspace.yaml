@@ -2,3 +2,6 @@ packages:
   - backend
   - frontend
   - infrastructure
+onlyBuiltDependencies:
+  - esbuild
+ignoredBuiltDependencies: []

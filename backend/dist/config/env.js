@@ -25,11 +25,42 @@ const envSchema = zod_1.z.object({
     SMTP_PASSWORD: zod_1.z.string().nonempty(),
     SMTP_SENDER_EMAIL: zod_1.z.string().nonempty(),
     SMTP_AUTH_DISABLED: zod_1.z.string().default('false').transform((v) => v === 'true'),
+    RECAPTCHA_SECRET_KEY: zod_1.z.string().optional(), // Opcional para desenvolvimento
+    FRONTEND_URL: zod_1.z.string().url().default("http://localhost:3001"), // URL do frontend para links de email
+    ALERT_EMAIL_TO: zod_1.z.string().optional(),
+    // Transfeera API Configuration
+    TRANSFEERA_CLIENT_ID: zod_1.z.string().optional(), // Opcional - usado apenas se Transfeera estiver habilitado
+    TRANSFEERA_CLIENT_SECRET: zod_1.z.string().optional(), // Opcional - usado apenas se Transfeera estiver habilitado
+    TRANSFEERA_API_URL: zod_1.z.string().url().default("https://api-sandbox.transfeera.com"), // URL da API Transfeera
+    TRANSFEERA_LOGIN_URL: zod_1.z.string().url().default("https://login-api-sandbox.transfeera.com"), // URL de autenticação Transfeera
+    TRANSFEERA_ENABLED: zod_1.z.string().default("false").transform((v) => v === "true"), // Habilitar/desabilitar Transfeera
+    TRANSFEERA_PIX_KEY: zod_1.z.string().optional(), // Chave Pix registrada na Transfeera para recebimentos
+    TRANSFEERA_WEBHOOK_SECRET: zod_1.z.string().min(32, "TRANSFEERA_WEBHOOK_SECRET must be at least 32 characters"),
 });
-const _env = envSchema.safeParse(process.env);
-if (!_env.success) {
-    console.error("❌ Invalid environment variables: ", _env.error.format());
-    // eslint-disable-next-line no-console
-    process.exit(1);
+const parsed = envSchema.safeParse(process.env);
+function testDefaults() {
+    return {
+        NODE_ENV: "test",
+        PORT: "3000",
+        DATABASE_URL: process.env.DATABASE_URL || "postgresql://localhost:5432/test",
+        RABBITMQ_URI: process.env.RABBITMQ_URI || "amqp://localhost",
+        JWT_SECRET: process.env.JWT_SECRET || "j".repeat(32),
+        SMTP_HOST: process.env.SMTP_HOST || "localhost",
+        SMTP_PORT: Number(process.env.SMTP_PORT || "25"),
+        SMTP_USERNAME: process.env.SMTP_USERNAME || "user",
+        SMTP_PASSWORD: process.env.SMTP_PASSWORD || "pass",
+        SMTP_SENDER_EMAIL: process.env.SMTP_SENDER_EMAIL || "test@example.com",
+        SMTP_AUTH_DISABLED: true,
+        RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
+        FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3001",
+        ALERT_EMAIL_TO: process.env.ALERT_EMAIL_TO,
+        TRANSFEERA_CLIENT_ID: process.env.TRANSFEERA_CLIENT_ID,
+        TRANSFEERA_CLIENT_SECRET: process.env.TRANSFEERA_CLIENT_SECRET,
+        TRANSFEERA_API_URL: process.env.TRANSFEERA_API_URL || "https://api-sandbox.transfeera.com",
+        TRANSFEERA_LOGIN_URL: process.env.TRANSFEERA_LOGIN_URL || "https://login-api-sandbox.transfeera.com",
+        TRANSFEERA_ENABLED: false,
+        TRANSFEERA_PIX_KEY: process.env.TRANSFEERA_PIX_KEY,
+        TRANSFEERA_WEBHOOK_SECRET: process.env.TRANSFEERA_WEBHOOK_SECRET || "x".repeat(32),
+    };
 }
-exports.env = _env.data;
+exports.env = parsed.success ? parsed.data : (process.env.NODE_ENV === "test" ? testDefaults() : (() => { console.error("❌ Invalid environment variables: ", parsed.error.format()); process.exit(1); })());

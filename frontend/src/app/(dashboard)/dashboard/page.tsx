@@ -195,14 +195,14 @@ export default function DashboardPage() {
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} variant="flat">
         <SidebarBody className="justify-between gap-8">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            <div className="mb-6">
+            <div className="mb-6 pr-10">
               {sidebarOpen ? <Logo /> : <LogoIcon />}
             </div>
             <div className="flex flex-col gap-4">
               {dashboardLink && (
                 <SidebarLink
                   link={dashboardLink}
-                  className={cn("bg-primary/10 text-primary font-semibold")}
+                  className={cn("bg-primary/20 text-primary font-semibold border-l-2 border-primary")}
                 />
               )}
               <SidebarSection title="Área de Vendas">
@@ -264,7 +264,7 @@ export default function DashboardPage() {
       </Sidebar>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden bg-card">
+      <div className="flex flex-1 flex-col overflow-hidden bg-transparent">
         <DashboardHeader
           progress={{ current: 582200, target: 650000 }}
           userName={authLoading ? "Carregando…" : displayName}
@@ -310,25 +310,22 @@ export default function DashboardPage() {
               {metrics && (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                   <MetricCard
-                    title="Total em vendas"
+                    title="Total de vendas"
                     value={formatCurrency(metrics.totalSales)}
-                    subtitle={formatCurrency(metrics.totalSales)}
                     icon={ShoppingCart}
-                    action={{
-                      label: "Solicitar saque",
-                      onClick: () => console.log("Solicitar saque"),
-                    }}
+                    trend={{ value: "40% últimos 30 dias", isPositive: true }}
                   />
                   <MetricCard
-                    title="Total de transações"
+                    title="Canceladas"
                     value={metrics.totalTransactions.toLocaleString("pt-BR")}
                     icon={Activity}
-                    trend={{ value: "+12%", isPositive: true }}
+                    trend={{ value: "10% últimos 30 dias", isPositive: false }}
                   />
                   <MetricCard
-                    title="Ticket médio"
+                    title="Ganho líquido"
                     value={formatCurrency(metrics.averageTicket)}
                     icon={TrendingUp}
+                    trend={{ value: "40% últimos 30 dias", isPositive: true }}
                   />
                   <MetricCard
                     title="Vendas por PIX"

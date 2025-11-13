@@ -20,7 +20,11 @@ exports.registerSchema = zod_1.z.object({
     document: zod_1.z.string().refine((doc) => (0, brDoc_1.validateCpf)(doc) || (0, brDoc_1.validateCnpj)(doc), 'CPF/CNPJ inválido'),
     phone: zod_1.z.string().optional(),
 });
-exports.loginSchema = exports.registerSchema; // same shape
+// Login deve aceitar apenas email e senha
+exports.loginSchema = zod_1.z.object({
+    email: zod_1.z.string().email(),
+    password: zod_1.z.string().regex(passwordRegex, 'Senha deve conter 8+ chars, maiúscula, minúscula, número e símbolo'),
+});
 class AuthService {
     static hashPassword(password) {
         return bcryptjs_1.default.hash(password, 12);

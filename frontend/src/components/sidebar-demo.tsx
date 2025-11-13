@@ -90,7 +90,7 @@ export const Logo = () => {
   return (
     <a
       href="/dashboard"
-      className="relative z-20 flex items-center space-x-2 py-2 px-2 rounded-md hover:bg-accent/50 transition-colors group"
+      className="relative z-10 flex items-center space-x-2 py-2 px-2 rounded-md hover:bg-[hsl(var(--sidebar-accent))] transition-colors group pr-8"
     >
       <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform" />
       <motion.span
@@ -108,7 +108,7 @@ export const LogoIcon = () => {
   return (
     <a
       href="/dashboard"
-      className="relative z-20 flex items-center justify-center py-2 px-2 rounded-md hover:bg-accent/50 transition-colors group"
+      className="relative z-10 flex items-center justify-center py-2 px-2 rounded-md hover:bg-[hsl(var(--sidebar-accent))] transition-colors group pr-8"
     >
       <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform" />
     </a>

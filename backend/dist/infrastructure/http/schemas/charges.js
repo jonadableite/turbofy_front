@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ErrorResponseSchema = exports.CreateChargeResponseSchema = exports.BoletoPayloadSchema = exports.PixPayloadSchema = exports.CreateChargeRequestSchema = exports.ChargeStatusSchema = exports.ChargeMethodSchema = void 0;
 const zod_1 = require("zod");
-exports.ChargeMethodSchema = zod_1.z.enum(["PIX", "BOLETO"]);
-exports.ChargeStatusSchema = zod_1.z.enum(["PENDING", "PAID", "EXPIRED", "CANCELED"]);
+const Charge_1 = require("../../../domain/entities/Charge");
+exports.ChargeMethodSchema = zod_1.z.nativeEnum(Charge_1.ChargeMethod);
+exports.ChargeStatusSchema = zod_1.z.nativeEnum(Charge_1.ChargeStatus);
 const SplitSchema = zod_1.z.object({
     merchantId: zod_1.z.string().uuid({ message: "merchantId must be a valid UUID" }),
     amountCents: zod_1.z.number().int().positive().optional(),

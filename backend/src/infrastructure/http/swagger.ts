@@ -217,7 +217,7 @@ const options = {
             },
           },
           responses: {
-            201: {
+            '201': {
               description: 'Cobrança criada',
               content: {
                 'application/json': {
@@ -225,8 +225,8 @@ const options = {
                 },
               },
             },
-            400: { description: 'Erro de validação' },
-            500: { description: 'Erro interno' },
+            '400': { description: 'Erro de validação' },
+            '500': { description: 'Erro interno' },
           },
         },
       },
@@ -245,9 +245,9 @@ const options = {
             },
           },
           responses: {
-            200: { description: 'Solicitação processada' },
-            400: { description: 'Entrada inválida' },
-            429: { description: 'Bloqueado por excesso de tentativas' },
+            '200': { description: 'Solicitação processada' },
+            '400': { description: 'Entrada inválida' },
+            '429': { description: 'Bloqueado por excesso de tentativas' },
           },
         },
       },
@@ -266,15 +266,15 @@ const options = {
             },
           },
           responses: {
-            200: {
+            '200': {
               description: 'Tokens emitidos',
               content: {
                 'application/json': { schema: { $ref: '#/components/schemas/Tokens' } },
               },
             },
-            400: { description: 'Entrada inválida' },
-            401: { description: 'OTP inválido/expirado' },
-            429: { description: 'Bloqueado por excesso de tentativas' },
+            '400': { description: 'Entrada inválida' },
+            '401': { description: 'OTP inválido/expirado' },
+            '429': { description: 'Bloqueado por excesso de tentativas' },
           },
         },
       },
@@ -300,7 +300,7 @@ const options = {
             },
           },
           responses: {
-            201: {
+            '201': {
               description: 'Conciliação criada e processada',
               content: {
                 'application/json': {
@@ -308,8 +308,8 @@ const options = {
                 },
               },
             },
-            400: { description: 'Erro de validação' },
-            500: { description: 'Erro interno' },
+            '400': { description: 'Erro de validação' },
+            '500': { description: 'Erro interno' },
           },
         },
       },
@@ -336,7 +336,7 @@ const options = {
             },
           },
           responses: {
-            201: {
+            '201': {
               description: 'Repasse criado',
               content: {
                 'application/json': {
@@ -344,8 +344,8 @@ const options = {
                 },
               },
             },
-            400: { description: 'Erro de validação' },
-            500: { description: 'Erro interno' },
+            '400': { description: 'Erro de validação' },
+            '500': { description: 'Erro interno' },
           },
         },
       },
@@ -356,7 +356,7 @@ const options = {
             { in: 'path', name: 'id', required: true, schema: { type: 'string', format: 'uuid' } },
           ],
           responses: {
-            200: {
+            '200': {
               description: 'Repasse processado',
               content: {
                 'application/json': {
@@ -364,20 +364,11 @@ const options = {
                 },
               },
             },
-            400: { description: 'Erro de validação' },
-            500: { description: 'Erro interno' },
+            '400': { description: 'Erro de validação' },
+            '500': { description: 'Erro interno' },
           },
         },
       },
-    },
-  },
-  apis: [],
-};
-
-export function setupSwagger(app: Express) {
-  const specs = swaggerJsdoc(options);
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
-}
       '/webhooks/transfeera': {
         post: {
           summary: 'Webhook Transfeera',
@@ -397,8 +388,17 @@ export function setupSwagger(app: Express) {
             },
           },
           responses: {
-            200: { description: 'Evento recebido' },
-            401: { description: 'Assinatura inválida' },
+            '200': { description: 'Evento recebido' },
+            '401': { description: 'Assinatura inválida' },
           },
         },
       },
+    },
+  },
+  apis: [],
+};
+
+export function setupSwagger(app: Express) {
+  const specs = swaggerJsdoc(options);
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
+}

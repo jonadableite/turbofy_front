@@ -27,6 +27,8 @@ function mapPrismaChargeToDomain(model) {
         pixQrCode: model.pixQrCode ?? undefined,
         pixCopyPaste: model.pixCopyPaste ?? undefined,
         boletoUrl: model.boletoUrl ?? undefined,
+        pixTxid: model.pixTxid ?? undefined,
+        paidAt: model.paidAt ?? undefined,
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
     });
@@ -38,6 +40,14 @@ class PrismaChargeRepository {
     }
     async findByIdempotencyKey(idempotencyKey) {
         const found = await prismaClient_1.prisma.charge.findUnique({ where: { idempotencyKey } });
+        return found ? mapPrismaChargeToDomain(found) : null;
+    }
+    async findByExternalRef(externalRef) {
+        const found = await prismaClient_1.prisma.charge.findFirst({ where: { externalRef } });
+        return found ? mapPrismaChargeToDomain(found) : null;
+    }
+    async findByTxid(txid) {
+        const found = await prismaClient_1.prisma.charge.findUnique({ where: { pixTxid: txid } });
         return found ? mapPrismaChargeToDomain(found) : null;
     }
     async create(charge) {
@@ -59,6 +69,8 @@ class PrismaChargeRepository {
                 pixQrCode: charge.pixQrCode ?? null,
                 pixCopyPaste: charge.pixCopyPaste ?? null,
                 boletoUrl: charge.boletoUrl ?? null,
+                pixTxid: charge.pixTxid ?? null,
+                paidAt: charge.paidAt ?? null,
             },
         });
         return mapPrismaChargeToDomain(created);
@@ -78,6 +90,8 @@ class PrismaChargeRepository {
                 pixQrCode: charge.pixQrCode ?? null,
                 pixCopyPaste: charge.pixCopyPaste ?? null,
                 boletoUrl: charge.boletoUrl ?? null,
+                pixTxid: charge.pixTxid ?? null,
+                paidAt: charge.paidAt ?? null,
             },
         });
         return mapPrismaChargeToDomain(updated);

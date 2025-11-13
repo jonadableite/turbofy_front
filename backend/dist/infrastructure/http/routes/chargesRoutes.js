@@ -5,11 +5,10 @@ const express_1 = require("express");
 const charges_1 = require("../schemas/charges");
 const zod_1 = require("zod");
 const PrismaChargeRepository_1 = require("../../database/PrismaChargeRepository");
-const StubPaymentProviderAdapter_1 = require("../../adapters/payment/StubPaymentProviderAdapter");
+const PaymentProviderFactory_1 = require("../../adapters/payment/PaymentProviderFactory");
 const InMemoryMessagingAdapter_1 = require("../../adapters/messaging/InMemoryMessagingAdapter");
 const CreateCharge_1 = require("../../../application/useCases/CreateCharge");
 const logger_1 = require("../../logger");
-const Charge_1 = require("../../../domain/entities/Charge");
 exports.chargesRouter = (0, express_1.Router)();
 // Middleware de idempotência
 exports.chargesRouter.use((req, res, next) => {
@@ -24,13 +23,11 @@ exports.chargesRouter.post("/", async (req, res) => {
         const parsed = charges_1.CreateChargeRequestSchema.parse(req.body);
         // Cria instâncias dos adapters (em produção usar DI/container)
         const chargeRepository = new PrismaChargeRepository_1.PrismaChargeRepository();
-        const paymentProvider = new StubPaymentProviderAdapter_1.StubPaymentProviderAdapter();
+        const paymentProvider = PaymentProviderFactory_1.PaymentProviderFactory.create();
         const messaging = new InMemoryMessagingAdapter_1.InMemoryMessagingAdapter();
         const useCase = new CreateCharge_1.CreateCharge(chargeRepository, paymentProvider, messaging);
-        // Map method string to domain enum (type-safe)
-        const methodEnum = parsed.method
-            ? (parsed.method === "PIX" ? Charge_1.ChargeMethod.PIX : Charge_1.ChargeMethod.BOLETO)
-            : undefined;
+        // With nativeEnum, parsed.method is already a ChargeMethod
+        const methodEnum = parsed.method;
         const result = await useCase.execute({
             idempotencyKey: req.header("X-Idempotency-Key"),
             merchantId: parsed.merchantId,

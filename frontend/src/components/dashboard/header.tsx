@@ -44,7 +44,7 @@ export const DashboardHeader = ({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "sticky top-0 z-50 w-full border-b border-border bg-transparent",
+        "sticky top-0 z-50 w-full border-b border-border/50 glass-strong",
         className
       )}
     >
@@ -60,12 +60,12 @@ export const DashboardHeader = ({
                   {formatCurrency(progress.target)}
                 </span>
               </div>
-              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-muted/30 overflow-hidden backdrop-blur-sm">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercentage}%` }}
                   transition={{ duration: 1, ease: "easeOut" }}
-                  className="h-full bg-primary rounded-full"
+                  className="h-full bg-primary rounded-full shadow-lg shadow-primary/30"
                 />
               </div>
             </div>
@@ -78,10 +78,10 @@ export const DashboardHeader = ({
           <AnimatedThemeToggler />
 
           {/* Notifications */}
-          <button className="relative rounded-lg p-2 hover:bg-muted transition-colors">
+          <button className="relative rounded-lg p-2 glass hover:bg-primary/10 transition-colors">
             <Bell className="h-5 w-5 text-foreground" />
             {notifications > 0 && (
-              <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+              <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-lg shadow-primary/30">
                 {notifications}
               </span>
             )}
@@ -91,7 +91,7 @@ export const DashboardHeader = ({
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted transition-colors"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 glass hover:bg-primary/10 transition-colors"
             >
               {userAvatar ? (
                 <img
@@ -114,7 +114,7 @@ export const DashboardHeader = ({
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute right-0 mt-2 w-48 rounded-lg border border-border bg-card shadow-lg p-2"
+                className="absolute right-0 mt-2 w-48 rounded-lg border border-border/50 glass-strong shadow-lg p-2"
               >
                 <a
                   href="/profile"

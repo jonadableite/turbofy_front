@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChargeSplit = void 0;
-const uuid_1 = require("uuid");
+const crypto_1 = require("crypto");
 class ChargeSplit {
     constructor(props) {
-        this.id = props.id || (0, uuid_1.v4)();
+        this.id = props.id || (0, crypto_1.randomUUID)();
         this.chargeId = props.chargeId;
         this.merchantId = props.merchantId;
         this.createdAt = props.createdAt || new Date();
