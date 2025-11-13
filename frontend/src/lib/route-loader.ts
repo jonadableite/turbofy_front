@@ -40,19 +40,21 @@ export const createLazyRoute = <T extends ComponentType<unknown>>(
  */
 export const preloadRoute = async (routeName: string): Promise<void> => {
   // Mapeamento de rotas para seus imports
+  // Apenas rotas existentes são incluídas aqui
   const routeMap: Record<string, () => Promise<unknown>> = {
     "/dashboard": () => import("@/app/(dashboard)/dashboard/page"),
     "/login": () => import("@/app/(auth)/login/page"),
     "/register": () => import("@/app/(auth)/register/page"),
     "/forgot": () => import("@/app/(auth)/forgot/page"),
-    "/vitrine": () => import("@/app/(dashboard)/vitrine/page").catch(() => null),
-    "/vendas": () => import("@/app/(dashboard)/vendas/page").catch(() => null),
-    "/financeiro": () => import("@/app/(dashboard)/financeiro/page").catch(() => null),
-    "/clientes": () => import("@/app/(dashboard)/clientes/page").catch(() => null),
-    "/afiliados": () => import("@/app/(dashboard)/afiliados/page").catch(() => null),
-    "/produtos": () => import("@/app/(dashboard)/produtos/page").catch(() => null),
-    "/configuracoes": () => import("@/app/(dashboard)/configuracoes/page").catch(() => null),
-    "/integracoes": () => import("@/app/(dashboard)/integracoes/page").catch(() => null),
+    // Rotas futuras serão adicionadas quando as páginas forem criadas
+    // "/vitrine": () => import("@/app/(dashboard)/vitrine/page"),
+    // "/vendas": () => import("@/app/(dashboard)/vendas/page"),
+    // "/financeiro": () => import("@/app/(dashboard)/financeiro/page"),
+    // "/clientes": () => import("@/app/(dashboard)/clientes/page"),
+    // "/afiliados": () => import("@/app/(dashboard)/afiliados/page"),
+    // "/produtos": () => import("@/app/(dashboard)/produtos/page"),
+    // "/configuracoes": () => import("@/app/(dashboard)/configuracoes/page"),
+    // "/integracoes": () => import("@/app/(dashboard)/integracoes/page"),
   };
 
   const importFn = routeMap[routeName];

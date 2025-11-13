@@ -6,14 +6,15 @@
   "main": "index.js",
   "scripts": {
     "dev": "pnpm prisma:generate && ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "pnpm prisma:generate && tsc -p tsconfig.build.json",
+    "build": "pnpm prisma:generate:force && tsc -p tsconfig.build.json",
     "test": "jest --runInBand",
     "prisma:generate": "prisma generate",
+    "prisma:generate:force": "node scripts/fix-prisma.js",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "predev": "pnpm prisma:generate",
-    "prebuild": "pnpm prisma:generate",
+    "predev": "pnpm prisma:generate:force",
+    "prebuild": "pnpm prisma:generate:force",
     "check": "ts-node scripts/check-setup.ts"
   },
   "keywords": [],

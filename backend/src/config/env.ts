@@ -36,7 +36,7 @@ const envSchema = z.object({
   TRANSFEERA_LOGIN_URL: z.string().url().default("https://login-api-sandbox.transfeera.com"), // URL de autenticação Transfeera
   TRANSFEERA_ENABLED: z.string().default("false").transform((v) => v === "true"), // Habilitar/desabilitar Transfeera
   TRANSFEERA_PIX_KEY: z.string().optional(), // Chave Pix registrada na Transfeera para recebimentos
-  TRANSFEERA_WEBHOOK_SECRET: z.string().min(32, "TRANSFEERA_WEBHOOK_SECRET must be at least 32 characters"),
+  TRANSFEERA_WEBHOOK_SECRET: z.string().min(32, "TRANSFEERA_WEBHOOK_SECRET must be at least 32 characters").optional(), // Secret para validar assinatura de webhooks
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -63,7 +63,7 @@ function testDefaults(): z.infer<typeof envSchema> {
     TRANSFEERA_LOGIN_URL: process.env.TRANSFEERA_LOGIN_URL || "https://login-api-sandbox.transfeera.com",
     TRANSFEERA_ENABLED: false,
     TRANSFEERA_PIX_KEY: process.env.TRANSFEERA_PIX_KEY,
-    TRANSFEERA_WEBHOOK_SECRET: process.env.TRANSFEERA_WEBHOOK_SECRET || "x".repeat(32),
+    TRANSFEERA_WEBHOOK_SECRET: process.env.TRANSFEERA_WEBHOOK_SECRET,
   };
 }
 

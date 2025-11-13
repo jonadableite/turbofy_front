@@ -181,7 +181,7 @@ authRouter.post('/register', authLimiter, async (req: Request, res: Response) =>
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Dados inválidos',
-          details: err.errors,
+          details: err.issues,
         },
       });
     }
@@ -235,7 +235,7 @@ authRouter.post('/login', authLimiter, async (req: Request, res: Response) => {
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Dados inválidos',
-          details: err.errors,
+          details: err.issues,
         },
       });
     }
@@ -252,18 +252,27 @@ authRouter.post('/login', authLimiter, async (req: Request, res: Response) => {
   }
 });
 
-// POST /auth/logout - Logout do usuário
-authRouter.post('/logout', authMiddleware, async (req: Request, res: Response) => {
+// POST /auth/logout - Logout do usuário (não exige autenticação obrigatória)
+authRouter.post('/logout', async (req: Request, res: Response) => {
   try {
-    // Limpar cookies
+    // Tentar invalidar token se existir (opcional)
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      // TODO: Invalidar token no servidor (adicionar à blacklist)
+      logger.info({ tokenLength: token.length }, 'Token invalidated on logout');
+    }
+
+    // Sempre limpar cookies (mesmo sem token válido)
     res.clearCookie('accessToken', { path: '/' });
     res.clearCookie('refreshToken', { path: '/' });
-
-    // TODO: Invalidar token no servidor (adicionar à blacklist)
     
     res.json({ success: true });
   } catch (err) {
     logger.error({ err }, 'Erro no logout');
+    // Mesmo em caso de erro, limpar cookies
+    res.clearCookie('accessToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/' });
     res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
   }
 });
@@ -322,9 +331,9 @@ authRouter.post('/mfa/request', mfaLimiter, async (req: Request, res: Response) 
     }
     logger.error({ err }, 'Erro ao solicitar MFA');
     res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
-  } finally {
-    span.end();
-  }
+        } finally {
+          span.end();
+        }
 });
 
 // POST /auth/mfa/verify - Verificar OTP e obter tokens

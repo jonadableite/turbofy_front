@@ -20,6 +20,7 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
   withCredentials: true, // Para cookies HttpOnly
+  timeout: 10000, // 10 segundos de timeout
 });
 
 // Interceptor para adicionar token de autenticação e CSRF
@@ -48,16 +49,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ error?: { code?: string; message?: string } }>) => {
+    // Apenas fazer logout em erro 401 e se não for uma requisição de autenticação
     if (error.response?.status === 401) {
-      // Token inválido ou expirado
-      clearTokens();
+      const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+      const isAuthPage = currentPath === "/login" || currentPath === "/register" || currentPath === "/forgot" || currentPath === "/forgot-password";
+      const isAuthEndpoint = error.config?.url?.includes("/auth/login") || error.config?.url?.includes("/auth/register");
       
-      // Redirecionar para login se não estiver em página de autenticação
-      if (typeof window !== "undefined") {
-        const currentPath = window.location.pathname;
-        const isAuthPage = currentPath === "/login" || currentPath === "/register" || currentPath === "/forgot" || currentPath === "/forgot-password";
+      // Não fazer logout se estiver em página de autenticação ou fazendo login/registro
+      if (!isAuthPage && !isAuthEndpoint) {
+        clearTokens();
         
-        if (!isAuthPage) {
+        // Redirecionar para login apenas se não estiver em página de autenticação
+        if (typeof window !== "undefined" && !isAuthPage) {
           window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
         }
       }

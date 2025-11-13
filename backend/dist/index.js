@@ -102,7 +102,8 @@ app.use((0, pino_http_1.default)({
         const method = req.method;
         const url = req.url;
         const status = res.statusCode;
-        const time = res.responseTime ? `${res.responseTime}ms` : '';
+        const rt = res.responseTime;
+        const time = rt ? `${rt}ms` : '';
         // Usar símbolos ASCII ao invés de emojis para evitar problemas de encoding
         let symbol = '[OK]';
         if (status >= 500)

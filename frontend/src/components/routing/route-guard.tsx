@@ -17,6 +17,7 @@ export const RouteGuard = ({
   requireGuest = false,
 }: RouteGuardProps) => {
   const [mounted, setMounted] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -26,18 +27,20 @@ export const RouteGuard = ({
   }, []);
 
   useEffect(() => {
-    if (!mounted || loading) return;
+    if (!mounted || loading || redirecting) return;
 
     if (requireAuth && !isAuthenticated) {
+      setRedirecting(true);
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 
     if (requireGuest && isAuthenticated) {
+      setRedirecting(true);
       router.push("/dashboard");
       return;
     }
-  }, [mounted, loading, isAuthenticated, requireAuth, requireGuest, router, pathname]);
+  }, [mounted, loading, isAuthenticated, requireAuth, requireGuest, router, pathname, redirecting]);
 
   if (!mounted || loading) {
     return (

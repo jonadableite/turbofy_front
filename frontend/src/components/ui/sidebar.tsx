@@ -126,11 +126,12 @@ export const Sidebar = ({
   );
 };
 
-export const SidebarBody = (props: React.ComponentProps<typeof motion.div>) => {
+export const SidebarBody = (props: Omit<React.ComponentProps<typeof motion.div>, 'children'> & { children: React.ReactNode }) => {
+  const { className, children } = props;
   return (
     <>
       <DesktopSidebar {...props} />
-      <MobileSidebar {...(props as React.ComponentProps<"div">)} />
+      <MobileSidebar className={className}>{children}</MobileSidebar>
     </>
   );
 };

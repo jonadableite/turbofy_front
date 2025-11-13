@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -15,8 +15,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Turbofy - Gateway de Pagamentos",
-  description: "Sistema completo de gestão de pagamentos e cobranças",
+  title: {
+    default: "Turbofy — Gateway de Pagamentos",
+    template: "%s | Turbofy",
+  },
+  description: "Speed, security e compliance. PCI‑DSS & LGPD, suporte a PIX & Boleto.",
+  applicationName: "Turbofy",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Turbofy — Gateway de Pagamentos",
+    description: "Pagamentos em milissegundos com segurança e conformidade.",
+    url: "/",
+    siteName: "Turbofy",
+    images: ["/next.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Turbofy — Gateway de Pagamentos",
+    description: "Pagamentos em milissegundos com segurança e conformidade.",
+    images: ["/next.svg"],
+  },
+  robots: { index: true, follow: true },
+  icons: { icon: "/favicon.ico" },
+  keywords: ["gateway", "pagamentos", "PIX", "boleto", "PCI-DSS", "LGPD"],
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0b0b0b",
 };
 
 export default function RootLayout({

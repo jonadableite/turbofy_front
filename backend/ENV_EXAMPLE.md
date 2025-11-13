@@ -51,6 +51,9 @@ TRANSFEERA_LOGIN_URL=https://login-api-sandbox.transfeera.com
 # Chave Pix registrada na Transfeera para recebimentos
 TRANSFEERA_PIX_KEY=your_pix_key@example.com
 
+# Secret para validar assinatura de webhooks da Transfeera (opcional em desenvolvimento)
+TRANSFEERA_WEBHOOK_SECRET=your_webhook_secret_minimum_32_characters
+
 # Node Environment
 NODE_ENV=development
 

@@ -1,11 +1,12 @@
 import type { NextConfig } from "next";
+import { resolve } from "path";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
   output: 'standalone',
+  // Configurar Turbopack com root explícito para monorepo
   turbopack: {
-    root: __dirname,
+    root: resolve(process.cwd()),
   },
 };
 

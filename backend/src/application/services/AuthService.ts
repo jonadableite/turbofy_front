@@ -172,4 +172,24 @@ export class AuthService {
       throw new Error('Invalid token');
     }
   }
+
+  async requestMfa(email: string): Promise<string> {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error('Invalid credentials');
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const codeHash = crypto.createHash('sha256').update(code).digest('hex');
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    await prisma.userOtp.create({ data: { userId: user.id, codeHash, expiresAt } });
+    return code;
+  }
+
+  async verifyMfa(email: string, otp: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error('Invalid credentials');
+    const codeHash = crypto.createHash('sha256').update(otp).digest('hex');
+    const record = await prisma.userOtp.findFirst({ where: { userId: user.id, codeHash, consumedAt: null } });
+    if (!record || record.expiresAt < new Date()) throw new Error('Invalid or expired OTP');
+    await prisma.userOtp.update({ where: { id: record.id }, data: { consumedAt: new Date() } });
+    return this.issueTokens(user.id, user.roles);
+  }
 }

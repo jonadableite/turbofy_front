@@ -64,23 +64,31 @@ transfeeraWebhookRouter.post("/", async (req: Request, res: Response) => {
     const raw = (req as any).rawBody as Buffer | undefined;
     const sigHeader = (req.headers["x-transfeera-signature"] || req.headers["x-signature"] || req.headers["x-hub-signature-256"]) as string | undefined;
     const start = process.hrtime.bigint();
+    // Validar assinatura apenas se TRANSFEERA_WEBHOOK_SECRET estiver configurado e não estiver em modo de teste
     if (process.env.NODE_ENV === "test") {
-      const event = req.body as TransfeeraWebhookEvent;
-      logger.info({ eventId: event.id, eventType: event.object }, "Test mode: skipping signature validation");
-    } else if (!raw || !sigHeader) {
-      const event = req.body as TransfeeraWebhookEvent;
-      const repo = new PrismaWebhookAttemptRepository();
-      await repo.record({ provider: "transfeera", type: event?.object || "unknown", eventId: event?.id || "unknown", status: "rejected", attempt: 0, signatureValid: false, payload: (event?.data as any) || {} });
-      return res.status(401).json({ error: "INVALID_SIGNATURE" });
-    }
-    const provided = sigHeader.startsWith("sha256=") ? sigHeader.slice(7) : sigHeader;
-    const expected = crypto.createHmac("sha256", env.TRANSFEERA_WEBHOOK_SECRET).update(raw ?? Buffer.from(JSON.stringify(req.body))).digest("hex");
-    const valid = provided === expected || (provided.length === expected.length && crypto.timingSafeEqual(Buffer.from(provided, "hex"), Buffer.from(expected, "hex")));
-    if (process.env.NODE_ENV !== "test" && !valid) {
-      const event = req.body as TransfeeraWebhookEvent;
-      const repo = new PrismaWebhookAttemptRepository();
-      await repo.record({ provider: "transfeera", type: event?.object || "unknown", eventId: event?.id || "unknown", status: "rejected", attempt: 0, signatureValid: false, payload: (event?.data as any) || {} });
-      return res.status(401).json({ error: "INVALID_SIGNATURE" });
+      logger.info({}, "Test mode: skipping signature validation");
+    } else if (env.TRANSFEERA_WEBHOOK_SECRET) {
+      // Se o secret está configurado, validar assinatura
+      if (!raw || !sigHeader) {
+        const event = req.body as TransfeeraWebhookEvent;
+        const repo = new PrismaWebhookAttemptRepository();
+        await repo.record({ provider: "transfeera", type: event?.object || "unknown", eventId: event?.id || "unknown", status: "rejected", attempt: 0, signatureValid: false, payload: (event?.data as any) || {} });
+        return res.status(401).json({ error: "INVALID_SIGNATURE" });
+      }
+      
+      const sh = sigHeader as string;
+      const provided = sh.startsWith("sha256=") ? sh.slice(7) : sh;
+      const expected = crypto.createHmac("sha256", env.TRANSFEERA_WEBHOOK_SECRET).update(raw ?? Buffer.from(JSON.stringify(req.body))).digest("hex");
+      const valid = provided === expected || (provided.length === expected.length && crypto.timingSafeEqual(Buffer.from(provided, "hex"), Buffer.from(expected, "hex")));
+      
+      if (!valid) {
+        const event = req.body as TransfeeraWebhookEvent;
+        const repo = new PrismaWebhookAttemptRepository();
+        await repo.record({ provider: "transfeera", type: event?.object || "unknown", eventId: event?.id || "unknown", status: "rejected", attempt: 0, signatureValid: false, payload: (event?.data as any) || {} });
+        return res.status(401).json({ error: "INVALID_SIGNATURE" });
+      }
+    } else {
+      logger.warn("TRANSFEERA_WEBHOOK_SECRET not configured - skipping signature validation (development mode)");
     }
     const event = req.body as TransfeeraWebhookEvent;
 
@@ -130,7 +138,7 @@ async function processWebhookEvent(event: TransfeeraWebhookEvent): Promise<void>
   try {
     switch (event.object) {
       case "CashIn":
-        await handleCashInEvent(event.data as CashInEventData);
+        await handleCashInEvent(event.data as unknown as CashInEventData);
         break;
 
       case "CashInRefund":
@@ -232,11 +240,8 @@ async function handleCashInEvent(data: CashInEventData): Promise<void> {
   }
   
   if (charge) {
-    await chargeRepository.update({
-      ...charge,
-      status: ChargeStatus.PAID,
-      paidAt: new Date(),
-    });
+    charge.markAsPaid();
+    await chargeRepository.update(charge);
 
     logger.info(
       {
@@ -318,11 +323,12 @@ async function handleChargeReceivableEvent(data: Record<string, unknown>): Promi
         chargeStatus = ChargeStatus.EXPIRED;
       }
 
-      await chargeRepository.update({
-        ...charge,
-        status: chargeStatus,
-        paidAt: status === "paid" ? new Date() : undefined,
-      });
+      if (status === "paid") {
+        charge.markAsPaid();
+      } else if (status === "expired" || status === "cancelled") {
+        charge.markAsExpired();
+      }
+      await chargeRepository.update(charge);
 
       logger.info(
         {
@@ -371,4 +377,3 @@ const eventsReceived = new Counter({ name: "webhook_events_received_total", help
 const eventsProcessed = new Counter({ name: "webhook_events_processed_total", help: "Contagem de eventos de webhook processados", labelNames: ["provider", "type"] });
 const eventsErrors = new Counter({ name: "webhook_events_errors_total", help: "Contagem de erros de processamento de webhook", labelNames: ["provider", "type"] });
 const eventLatency = new Histogram({ name: "webhook_event_latency_seconds", help: "Latência do processamento de eventos de webhook", labelNames: ["provider", "type"], buckets: [0.01, 0.1, 0.5, 1, 5, 30, 300] });
-    const start = process.hrtime.bigint();

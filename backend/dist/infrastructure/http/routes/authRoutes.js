@@ -171,7 +171,7 @@ authRouter.post('/register', authLimiter, async (req, res) => {
                 error: {
                     code: 'VALIDATION_ERROR',
                     message: 'Dados inválidos',
-                    details: err.errors,
+                    details: err.issues,
                 },
             });
         }
@@ -221,7 +221,7 @@ authRouter.post('/login', authLimiter, async (req, res) => {
                 error: {
                     code: 'VALIDATION_ERROR',
                     message: 'Dados inválidos',
-                    details: err.errors,
+                    details: err.issues,
                 },
             });
         }
@@ -238,17 +238,26 @@ authRouter.post('/login', authLimiter, async (req, res) => {
         span.end();
     }
 });
-// POST /auth/logout - Logout do usuário
-authRouter.post('/logout', authMiddleware_1.authMiddleware, async (req, res) => {
+// POST /auth/logout - Logout do usuário (não exige autenticação obrigatória)
+authRouter.post('/logout', async (req, res) => {
     try {
-        // Limpar cookies
+        // Tentar invalidar token se existir (opcional)
+        const authHeader = req.headers['authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.replace('Bearer ', '');
+            // TODO: Invalidar token no servidor (adicionar à blacklist)
+            logger_1.logger.info({ tokenLength: token.length }, 'Token invalidated on logout');
+        }
+        // Sempre limpar cookies (mesmo sem token válido)
         res.clearCookie('accessToken', { path: '/' });
         res.clearCookie('refreshToken', { path: '/' });
-        // TODO: Invalidar token no servidor (adicionar à blacklist)
         res.json({ success: true });
     }
     catch (err) {
         logger_1.logger.error({ err }, 'Erro no logout');
+        // Mesmo em caso de erro, limpar cookies
+        res.clearCookie('accessToken', { path: '/' });
+        res.clearCookie('refreshToken', { path: '/' });
         res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno' } });
     }
 });

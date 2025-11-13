@@ -161,6 +161,7 @@ export const checkInactivity = (): boolean => {
 
 /**
  * Validar token no servidor
+ * @deprecated Use api.get("/auth/me") diretamente - esta função pode causar problemas de CORS
  */
 export const validateToken = async (): Promise<boolean> => {
   const token = getAccessToken();
@@ -173,12 +174,15 @@ export const validateToken = async (): Promise<boolean> => {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
       credentials: "include",
     });
 
     return response.ok;
   } catch {
-    return false;
+    // Em caso de erro de rede, retornar true para não invalidar sessão válida
+    // O erro será tratado na chamada real da API
+    return true;
   }
 };

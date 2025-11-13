@@ -1,0 +1,17 @@
+.git
+.gitignore
+node_modules
+**/node_modules
+.next
+frontend/.next
+backend/coverage
+backend/.env
+frontend/.env
+*.log
+Dockerfile*
+.pnpm-store
+.sst
+dist
+**/dist
+tmp
+**/tmp

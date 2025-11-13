@@ -41,10 +41,22 @@ export const Tooltip = ({ content, children, delay = 120 }: TooltipProps) => {
 
   const childProps = {
     "aria-describedby": visible ? id : undefined,
-    onMouseEnter: compose(children.props.onMouseEnter, show),
-    onMouseLeave: compose(children.props.onMouseLeave, hide),
-    onFocus: compose(children.props.onFocus, show),
-    onBlur: compose(children.props.onBlur, hide),
+    onMouseEnter: compose(
+      (children.props as { onMouseEnter?: (e: React.SyntheticEvent) => void }).onMouseEnter,
+      show
+    ),
+    onMouseLeave: compose(
+      (children.props as { onMouseLeave?: (e: React.SyntheticEvent) => void }).onMouseLeave,
+      hide
+    ),
+    onFocus: compose(
+      (children.props as { onFocus?: (e: React.SyntheticEvent) => void }).onFocus,
+      show
+    ),
+    onBlur: compose(
+      (children.props as { onBlur?: (e: React.SyntheticEvent) => void }).onBlur,
+      hide
+    ),
   } as const;
 
   return (

@@ -164,5 +164,26 @@ class AuthService {
             throw new Error('Invalid token');
         }
     }
+    async requestMfa(email) {
+        const user = await prismaClient_1.prisma.user.findUnique({ where: { email } });
+        if (!user)
+            throw new Error('Invalid credentials');
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const codeHash = crypto_1.default.createHash('sha256').update(code).digest('hex');
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        await prismaClient_1.prisma.userOtp.create({ data: { userId: user.id, codeHash, expiresAt } });
+        return code;
+    }
+    async verifyMfa(email, otp) {
+        const user = await prismaClient_1.prisma.user.findUnique({ where: { email } });
+        if (!user)
+            throw new Error('Invalid credentials');
+        const codeHash = crypto_1.default.createHash('sha256').update(otp).digest('hex');
+        const record = await prismaClient_1.prisma.userOtp.findFirst({ where: { userId: user.id, codeHash, consumedAt: null } });
+        if (!record || record.expiresAt < new Date())
+            throw new Error('Invalid or expired OTP');
+        await prismaClient_1.prisma.userOtp.update({ where: { id: record.id }, data: { consumedAt: new Date() } });
+        return this.issueTokens(user.id, user.roles);
+    }
 }
 exports.AuthService = AuthService;

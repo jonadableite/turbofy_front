@@ -35,7 +35,7 @@ const envSchema = zod_1.z.object({
     TRANSFEERA_LOGIN_URL: zod_1.z.string().url().default("https://login-api-sandbox.transfeera.com"), // URL de autenticação Transfeera
     TRANSFEERA_ENABLED: zod_1.z.string().default("false").transform((v) => v === "true"), // Habilitar/desabilitar Transfeera
     TRANSFEERA_PIX_KEY: zod_1.z.string().optional(), // Chave Pix registrada na Transfeera para recebimentos
-    TRANSFEERA_WEBHOOK_SECRET: zod_1.z.string().min(32, "TRANSFEERA_WEBHOOK_SECRET must be at least 32 characters"),
+    TRANSFEERA_WEBHOOK_SECRET: zod_1.z.string().min(32, "TRANSFEERA_WEBHOOK_SECRET must be at least 32 characters").optional(), // Secret para validar assinatura de webhooks
 });
 const parsed = envSchema.safeParse(process.env);
 function testDefaults() {
@@ -60,7 +60,7 @@ function testDefaults() {
         TRANSFEERA_LOGIN_URL: process.env.TRANSFEERA_LOGIN_URL || "https://login-api-sandbox.transfeera.com",
         TRANSFEERA_ENABLED: false,
         TRANSFEERA_PIX_KEY: process.env.TRANSFEERA_PIX_KEY,
-        TRANSFEERA_WEBHOOK_SECRET: process.env.TRANSFEERA_WEBHOOK_SECRET || "x".repeat(32),
+        TRANSFEERA_WEBHOOK_SECRET: process.env.TRANSFEERA_WEBHOOK_SECRET,
     };
 }
 exports.env = parsed.success ? parsed.data : (process.env.NODE_ENV === "test" ? testDefaults() : (() => { console.error("❌ Invalid environment variables: ", parsed.error.format()); process.exit(1); })());

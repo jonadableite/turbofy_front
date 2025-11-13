@@ -43,8 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const inactivityCheckRef = useRef<NodeJS.Timeout | null>(null);
   const tokenRefreshRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Verificar autenticação inicial
-  const checkAuth = useCallback(async () => {
+  // Verificar autenticação inicial com retry
+  const checkAuth = useCallback(async (retryCount = 0) => {
     if (!isTokenValid()) {
       setUser(null);
       setLoading(false);
@@ -52,25 +52,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      // Validar token no servidor
-      const isValid = await validateToken();
-      if (!isValid) {
-        clearTokens();
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      // Buscar dados do usuário
+      // Buscar dados do usuário diretamente (o endpoint já valida o token)
       const response = await api.get<AuthenticatedUser>("/auth/me");
       setUser(response.data);
       setError(null);
-    } catch {
-      clearTokens();
-      setUser(null);
-      setError("Sessão expirada. Faça login novamente.");
-    } finally {
       setLoading(false);
+    } catch (err: unknown) {
+      // Verificar se é um erro 401 (não autorizado) ou outro tipo de erro
+      const axiosError = err as { response?: { status?: number }; code?: string; message?: string };
+      
+      if (axiosError.response?.status === 401) {
+        // Token inválido ou expirado - fazer logout
+        clearTokens();
+        setUser(null);
+        setError("Sessão expirada. Faça login novamente.");
+        setLoading(false);
+      } else if (retryCount < 2 && (axiosError.code === "ECONNABORTED" || axiosError.code === "ERR_NETWORK" || !axiosError.response)) {
+        // Erro de rede - tentar novamente após 1 segundo
+        setTimeout(() => {
+          checkAuth(retryCount + 1);
+        }, 1000);
+      } else {
+        // Erro persistente ou não é erro de rede - manter usuário logado mas mostrar erro
+        setError("Erro ao verificar autenticação. Tente recarregar a página.");
+        setLoading(false);
+        // Não limpar tokens em caso de erro de rede
+      }
     }
   }, []);
 
@@ -106,8 +113,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAccessToken(accessToken, expiresIn);
       updateLastActivity();
 
-      // Buscar dados do usuário
-      await checkAuth();
+      // Buscar dados do usuário (sem retry no login - já temos token válido)
+      try {
+        const userResponse = await api.get<AuthenticatedUser>("/auth/me");
+        setUser(userResponse.data);
+        setError(null);
+      } catch (err: unknown) {
+        // Se falhar ao buscar usuário após login, ainda assim redirecionar
+        // O RouteGuard vai verificar novamente
+        const axiosError = err as { response?: { status?: number } };
+        if (axiosError.response?.status === 401) {
+          // Token inválido mesmo após login - limpar e mostrar erro
+          clearTokens();
+          setError("Erro ao obter dados do usuário. Tente fazer login novamente.");
+          return;
+        }
+      }
+
+      // Aguardar um pouco para garantir que o estado foi atualizado
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Redirecionar para dashboard ou rota original
       const redirectUrl = new URLSearchParams(window.location.search).get("redirect") || "/dashboard";
@@ -145,9 +169,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await api.get<AuthenticatedUser>("/auth/me");
       setUser(response.data);
       updateLastActivity();
-    } catch {
-      // Se falhar, fazer logout
-      await logout();
+      setError(null);
+    } catch (err: unknown) {
+      // Verificar se é erro 401 antes de fazer logout
+      const axiosError = err as { response?: { status?: number } };
+      
+      if (axiosError.response?.status === 401) {
+        // Token inválido - fazer logout
+        await logout();
+      } else {
+        // Erro de rede - não fazer logout, apenas logar o erro silenciosamente
+        // Manter usuário logado em caso de erros temporários
+      }
     }
   }, [logout]);
 
@@ -195,8 +228,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       try {
         await refreshUser();
-      } catch {
-        // Ignorar erros silenciosamente
+      } catch (err: unknown) {
+        // Logar erro mas não fazer logout em erros de rede
+        const axiosError = err as { response?: { status?: number } };
+        if (axiosError.response?.status === 401) {
+          // Apenas fazer logout se for erro 401
+          await logout();
+        }
+        // Ignorar outros erros (rede, timeout, etc)
       }
     };
 
@@ -209,10 +248,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [user, refreshUser, logout]);
 
-  // Verificar autenticação inicial
+  // Verificar autenticação inicial (apenas uma vez no mount)
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    let mounted = true;
+    
+    const initAuth = async () => {
+      if (mounted) {
+        await checkAuth();
+      }
+    };
+    
+    initAuth();
+    
+    return () => {
+      mounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Executar apenas uma vez no mount
 
   // Proteger rotas no cliente (comentado - RouteGuard já faz isso)
   // useEffect(() => {

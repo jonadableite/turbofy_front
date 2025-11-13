@@ -6,7 +6,7 @@ COPY next.config.ts tsconfig.json ./
 COPY public ./public
 COPY src ./src
 RUN pnpm install --frozen-lockfile
-RUN pnpm build
+RUN pnpm build --webpack
 
 FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runner
 WORKDIR /app
