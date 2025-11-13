@@ -55,4 +55,18 @@ export class EmailService {
     });
     logger.info({ to }, 'Password reset email sent');
   }
+
+  async sendGenericEmail(to: string, subject: string, html: string): Promise<void> {
+    if (env.SMTP_AUTH_DISABLED) {
+      logger.warn({ to }, 'SMTP disabled; skipping generic email');
+      return;
+    }
+    await this.transporter.sendMail({
+      from: env.SMTP_SENDER_EMAIL,
+      to,
+      subject,
+      html,
+    });
+    logger.info({ to }, 'Generic email sent');
+  }
 }

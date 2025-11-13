@@ -161,6 +161,18 @@ const options = {
           },
           required: ['id','merchantId','amountCents','currency','status','updatedAt'],
         },
+        TransfeeraWebhookEvent: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            version: { type: 'string' },
+            account_id: { type: 'string' },
+            object: { type: 'string', enum: ['CashIn','CashInRefund','PixKey','ChargeReceivable','Payin','PaymentLink'] },
+            date: { type: 'string' },
+            data: { type: 'object', additionalProperties: true },
+          },
+          required: ['id','object','data'],
+        },
       },
     },
     paths: {
@@ -366,3 +378,27 @@ export function setupSwagger(app: Express) {
   const specs = swaggerJsdoc(options);
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 }
+      '/webhooks/transfeera': {
+        post: {
+          summary: 'Webhook Transfeera',
+          parameters: [
+            {
+              in: 'header',
+              name: 'X-Transfeera-Signature',
+              required: true,
+              schema: { type: 'string' },
+              description: 'Assinatura HMAC-SHA256 do corpo (hex ou sha256=<hex>)',
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/TransfeeraWebhookEvent' } },
+            },
+          },
+          responses: {
+            200: { description: 'Evento recebido' },
+            401: { description: 'Assinatura inválida' },
+          },
+        },
+      },

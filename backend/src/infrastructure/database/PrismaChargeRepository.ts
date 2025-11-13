@@ -27,6 +27,8 @@ function mapPrismaChargeToDomain(model: any): Charge {
     pixQrCode: model.pixQrCode ?? undefined,
     pixCopyPaste: model.pixCopyPaste ?? undefined,
     boletoUrl: model.boletoUrl ?? undefined,
+    pixTxid: model.pixTxid ?? undefined,
+    paidAt: model.paidAt ?? undefined,
     createdAt: model.createdAt,
     updatedAt: model.updatedAt,
   });
@@ -40,6 +42,16 @@ export class PrismaChargeRepository implements ChargeRepository {
 
   async findByIdempotencyKey(idempotencyKey: string): Promise<Charge | null> {
     const found = await prisma.charge.findUnique({ where: { idempotencyKey } });
+    return found ? mapPrismaChargeToDomain(found) : null;
+  }
+
+  async findByExternalRef(externalRef: string): Promise<Charge | null> {
+    const found = await prisma.charge.findFirst({ where: { externalRef } });
+    return found ? mapPrismaChargeToDomain(found) : null;
+  }
+
+  async findByTxid(txid: string): Promise<Charge | null> {
+    const found = await prisma.charge.findUnique({ where: { pixTxid: txid } });
     return found ? mapPrismaChargeToDomain(found) : null;
   }
 
@@ -62,6 +74,8 @@ export class PrismaChargeRepository implements ChargeRepository {
         pixQrCode: charge.pixQrCode ?? null,
         pixCopyPaste: charge.pixCopyPaste ?? null,
         boletoUrl: charge.boletoUrl ?? null,
+        pixTxid: charge.pixTxid ?? null,
+        paidAt: charge.paidAt ?? null,
       },
     });
     return mapPrismaChargeToDomain(created);
@@ -82,6 +96,8 @@ export class PrismaChargeRepository implements ChargeRepository {
         pixQrCode: charge.pixQrCode ?? null,
         pixCopyPaste: charge.pixCopyPaste ?? null,
         boletoUrl: charge.boletoUrl ?? null,
+        pixTxid: charge.pixTxid ?? null,
+        paidAt: charge.paidAt ?? null,
       },
     });
     return mapPrismaChargeToDomain(updated);
