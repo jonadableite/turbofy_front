@@ -27,6 +27,8 @@ import { chargesRouter } from "./infrastructure/http/routes/chargesRoutes";
 import { settlementsRouter } from "./infrastructure/http/routes/settlementsRoutes";
 import { reconciliationsRouter } from "./infrastructure/http/routes/reconciliationsRoutes";
 import { dashboardRouter } from "./infrastructure/http/routes/dashboardRoutes";
+import { transfeeraWebhookRouter } from "./infrastructure/http/routes/transfeeraWebhookRoutes";
+import { register } from "prom-client";
 
 const app = express();
 
@@ -47,7 +49,7 @@ app.use(
     credentials: true, // Permitir cookies (necessário para HttpOnly cookies)
   })
 );
-app.use(express.json());
+app.use(express.json({ verify: (req: any, _res, buf) => { req.rawBody = buf; } }));
 
 // Middleware para ignorar requisições conhecidas que retornam 404
 app.use((req, res, next) => {
@@ -152,6 +154,11 @@ app.use('/charges', chargesRouter);
 app.use('/settlements', settlementsRouter);
 app.use('/reconciliations', reconciliationsRouter);
 app.use('/dashboard', dashboardRouter);
+app.use('/webhooks/transfeera', transfeeraWebhookRouter);
+app.get('/metrics', async (_req, res) => {
+  res.setHeader('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
 // TODO: Register domain routers here (payments, merchants etc.)
 
 // Swagger docs

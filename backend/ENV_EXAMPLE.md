@@ -34,6 +34,23 @@ FRONTEND_URL=http://localhost:3001
 # CORS Origin (restringir em produção)
 CORS_ORIGIN=http://localhost:3001
 
+# Transfeera API Configuration (opcional - para integração com Transfeera)
+# Habilitar/desabilitar Transfeera
+TRANSFEERA_ENABLED=false
+
+# Credenciais da Transfeera (obtidas na plataforma)
+# Sandbox: https://app-sandbox.transfeera.com > Minha Conta > Credenciais de APIs
+# Produção: https://app.transfeera.com > Minha Conta > Credenciais de APIs
+TRANSFEERA_CLIENT_ID=your_transfeera_client_id
+TRANSFEERA_CLIENT_SECRET=your_transfeera_client_secret
+
+# URLs da API (sandbox por padrão)
+TRANSFEERA_API_URL=https://api-sandbox.transfeera.com
+TRANSFEERA_LOGIN_URL=https://login-api-sandbox.transfeera.com
+
+# Chave Pix registrada na Transfeera para recebimentos
+TRANSFEERA_PIX_KEY=your_pix_key@example.com
+
 # Node Environment
 NODE_ENV=development
 

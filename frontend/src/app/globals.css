@@ -100,46 +100,54 @@
 }
 
 .dark {
-  --background: 0 0% 5%;
+  /* Fundo escuro estilo glassmorphism */
+  --background: 220 15% 8%; /* Cinza muito escuro */
   --foreground: 0 0% 98%;
 
-  --card: 0 0% 8%;
+  /* Cards translúcidos com glassmorphism */
+  --card: 220 15% 12% / 0.7; /* Semi-transparente */
   --card-foreground: 0 0% 98%;
 
-  --popover: 0 0% 8%;
+  --popover: 220 15% 12% / 0.9;
   --popover-foreground: 0 0% 98%;
 
-  --primary: 217 91% 60%; /* Azul #3177fa */
+  /* Verde para tendências positivas  */
+  --primary: 83 70% 61%; /* #a4e155 */
   --primary-foreground: 0 0% 98%;
 
-  --secondary: 0 0% 15%;
+  --secondary: 220 15% 18%;
   --secondary-foreground: 0 0% 98%;
 
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 65%;
+  --muted: 220 15% 18%;
+  --muted-foreground: 0 0% 70%;
 
-  --accent: 0 0% 15%;
+  --accent: 220 15% 18%;
   --accent-foreground: 0 0% 98%;
 
-  --destructive: 0 62.8% 50%;
+  /* Vermelho para tendências negativas */
+  --destructive: 0 72% 51%; /* Vermelho vibrante */
   --destructive-foreground: 0 0% 98%;
 
-  --border: 0 0% 20%;
-  --input: 0 0% 15%;
-  --ring: 0 0% 83.1%;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --border: 220 15% 20% / 0.5; /* Borda semi-transparente */
+  --input: 220 15% 15% / 0.7;
+  --ring: 142 71% 45%;
+
+  /* Cores dos gráficos */
+  --chart-1: 142 71% 45%; /* Verde */
+  --chart-2: 0 72% 51%; /* Vermelho */
+  --chart-3: 217 91% 60%; /* Azul */
+  --chart-4: 38 92% 50%; /* Amarelo */
+  --chart-5: 280 70% 50%; /* Roxo */
+
+  /* Sidebar escura */
+  --sidebar: 220 15% 10%;
+  --sidebar-foreground: 0 0% 85%;
+  --sidebar-primary: 142 71% 45%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 220 15% 15%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 220 15% 20% / 0.3;
+  --sidebar-ring: 142 71% 45%;
 }
 
 .shadow-input {
@@ -162,7 +170,29 @@ body {
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    /* Gradiente sutil no fundo para profundidade */
+    background-image: radial-gradient(
+        at 0% 0%,
+        hsl(220 15% 12% / 0.3) 0px,
+        transparent 50%
+      ),
+      radial-gradient(at 100% 100%, hsl(220 15% 10% / 0.3) 0px, transparent 50%);
   }
+}
+
+/* Glassmorphism utility classes */
+.glass {
+  background: hsl(var(--card));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border));
+}
+
+.glass-strong {
+  background: hsl(var(--card));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsl(var(--border));
 }
 
 /* View Transitions para Animated Theme Toggler */

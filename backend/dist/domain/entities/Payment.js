@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Payment = exports.PaymentMethod = exports.PaymentStatus = void 0;
-const uuid_1 = require("uuid");
+const crypto_1 = require("crypto");
 var PaymentStatus;
 (function (PaymentStatus) {
     PaymentStatus["PENDING"] = "PENDING";
@@ -18,7 +18,7 @@ var PaymentMethod;
 })(PaymentMethod || (exports.PaymentMethod = PaymentMethod = {}));
 class Payment {
     constructor(props) {
-        this.id = props.id || (0, uuid_1.v4)();
+        this.id = props.id || (0, crypto_1.randomUUID)();
         this.amount = props.amount;
         this.description = props.description;
         this.merchantId = props.merchantId;

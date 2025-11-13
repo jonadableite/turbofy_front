@@ -161,6 +161,18 @@ const options = {
           },
           required: ['id','merchantId','amountCents','currency','status','updatedAt'],
         },
+        TransfeeraWebhookEvent: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            version: { type: 'string' },
+            account_id: { type: 'string' },
+            object: { type: 'string', enum: ['CashIn','CashInRefund','PixKey','ChargeReceivable','Payin','PaymentLink'] },
+            date: { type: 'string' },
+            data: { type: 'object', additionalProperties: true },
+          },
+          required: ['id','object','data'],
+        },
       },
     },
     paths: {
@@ -205,7 +217,7 @@ const options = {
             },
           },
           responses: {
-            201: {
+            '201': {
               description: 'Cobrança criada',
               content: {
                 'application/json': {
@@ -213,8 +225,8 @@ const options = {
                 },
               },
             },
-            400: { description: 'Erro de validação' },
-            500: { description: 'Erro interno' },
+            '400': { description: 'Erro de validação' },
+            '500': { description: 'Erro interno' },
           },
         },
       },
@@ -233,9 +245,9 @@ const options = {
             },
           },
           responses: {
-            200: { description: 'Solicitação processada' },
-            400: { description: 'Entrada inválida' },
-            429: { description: 'Bloqueado por excesso de tentativas' },
+            '200': { description: 'Solicitação processada' },
+            '400': { description: 'Entrada inválida' },
+            '429': { description: 'Bloqueado por excesso de tentativas' },
           },
         },
       },
@@ -254,15 +266,15 @@ const options = {
             },
           },
           responses: {
-            200: {
+            '200': {
               description: 'Tokens emitidos',
               content: {
                 'application/json': { schema: { $ref: '#/components/schemas/Tokens' } },
               },
             },
-            400: { description: 'Entrada inválida' },
-            401: { description: 'OTP inválido/expirado' },
-            429: { description: 'Bloqueado por excesso de tentativas' },
+            '400': { description: 'Entrada inválida' },
+            '401': { description: 'OTP inválido/expirado' },
+            '429': { description: 'Bloqueado por excesso de tentativas' },
           },
         },
       },
@@ -288,7 +300,7 @@ const options = {
             },
           },
           responses: {
-            201: {
+            '201': {
               description: 'Conciliação criada e processada',
               content: {
                 'application/json': {
@@ -296,8 +308,8 @@ const options = {
                 },
               },
             },
-            400: { description: 'Erro de validação' },
-            500: { description: 'Erro interno' },
+            '400': { description: 'Erro de validação' },
+            '500': { description: 'Erro interno' },
           },
         },
       },
@@ -324,7 +336,7 @@ const options = {
             },
           },
           responses: {
-            201: {
+            '201': {
               description: 'Repasse criado',
               content: {
                 'application/json': {
@@ -332,8 +344,8 @@ const options = {
                 },
               },
             },
-            400: { description: 'Erro de validação' },
-            500: { description: 'Erro interno' },
+            '400': { description: 'Erro de validação' },
+            '500': { description: 'Erro interno' },
           },
         },
       },
@@ -344,7 +356,7 @@ const options = {
             { in: 'path', name: 'id', required: true, schema: { type: 'string', format: 'uuid' } },
           ],
           responses: {
-            200: {
+            '200': {
               description: 'Repasse processado',
               content: {
                 'application/json': {
@@ -352,8 +364,32 @@ const options = {
                 },
               },
             },
-            400: { description: 'Erro de validação' },
-            500: { description: 'Erro interno' },
+            '400': { description: 'Erro de validação' },
+            '500': { description: 'Erro interno' },
+          },
+        },
+      },
+      '/webhooks/transfeera': {
+        post: {
+          summary: 'Webhook Transfeera',
+          parameters: [
+            {
+              in: 'header',
+              name: 'X-Transfeera-Signature',
+              required: true,
+              schema: { type: 'string' },
+              description: 'Assinatura HMAC-SHA256 do corpo (hex ou sha256=<hex>)',
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/TransfeeraWebhookEvent' } },
+            },
+          },
+          responses: {
+            '200': { description: 'Evento recebido' },
+            '401': { description: 'Assinatura inválida' },
           },
         },
       },

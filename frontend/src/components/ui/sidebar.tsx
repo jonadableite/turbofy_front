@@ -79,13 +79,13 @@ export const SidebarProvider = ({
   useEffect(() => {
     try {
       window.localStorage.setItem("turbofy:sidebar:pinned", pinned ? "1" : "0");
-    } catch {}
+    } catch { }
   }, [pinned]);
 
   useEffect(() => {
     try {
       window.localStorage.setItem("turbofy:sidebar:pinnedOpen", pinnedOpen ? "1" : "0");
-    } catch {}
+    } catch { }
   }, [pinnedOpen]);
 
   return (
@@ -139,7 +139,7 @@ export const DesktopSidebar = ({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof motion.div>) => {
+}: Omit<React.ComponentProps<typeof motion.div>, 'children'> & { children: React.ReactNode }) => {
   const { open, setOpen, animate, pinned, setPinned, pinnedOpen, setPinnedOpen, variant } = useSidebar();
 
   const effectiveOpen = pinned ? pinnedOpen : open;
@@ -155,20 +155,20 @@ export const DesktopSidebar = ({
   const handlePinClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!pinned) {
       // Fixar sidebar no estado atual (aberta)
       setPinned(true);
       setPinnedOpen(true);
       return;
     }
-    
+
     if (pinned && pinnedOpen) {
       // Se está fixada e aberta, fechar mas manter fixada
       setPinnedOpen(false);
       return;
     }
-    
+
     if (pinned && !pinnedOpen) {
       // Se está fixada e fechada, desafixar
       setPinned(false);
@@ -182,7 +182,7 @@ export const DesktopSidebar = ({
       <motion.div
         className={cn(
           "h-screen sticky top-0 px-4 py-4 hidden md:flex md:flex-col w-[280px] shrink-0",
-          "bg-card border-r border-border",
+          "bg-[hsl(var(--sidebar))] border-r border-[hsl(var(--sidebar-border))]",
           sidebarContainerVariants({ style: variant }),
           className
         )}
@@ -196,36 +196,36 @@ export const DesktopSidebar = ({
         aria-label="Sidebar"
         {...props}
       >
-        <div className="absolute right-3 top-3 z-10">
+        {children}
+        <div className="absolute right-2 top-2 z-10">
           <button
             type="button"
             aria-label={
               !pinned
                 ? "Fixar sidebar"
                 : pinnedOpen
-                ? "Recolher sidebar"
-                : "Desafixar sidebar"
+                  ? "Recolher sidebar"
+                  : "Desafixar sidebar"
             }
             aria-pressed={pinned}
             title={!pinned ? "Fixar sidebar" : pinnedOpen ? "Recolher sidebar" : "Desafixar sidebar"}
             onClick={handlePinClick}
             className={cn(
-              "inline-flex h-8 w-8 items-center justify-center rounded-md transition-all",
+              "inline-flex h-7 w-7 items-center justify-center rounded-md transition-all",
               "text-muted-foreground hover:text-primary",
-              "bg-background/50 backdrop-blur-sm",
+              "bg-background/80 backdrop-blur-sm",
               "border border-border hover:border-primary/50",
-              "hover:bg-accent/50",
+              "hover:bg-accent/50 shadow-sm",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             )}
           >
             {pinned ? (
-              <IconPinFilled className="h-4 w-4" />
+              <IconPinFilled className="h-3.5 w-3.5" />
             ) : (
-              <IconPin className="h-4 w-4" />
+              <IconPin className="h-3.5 w-3.5" />
             )}
           </button>
         </div>
-        {children}
       </motion.div>
     </>
   );
@@ -304,7 +304,7 @@ export const SidebarLink = ({
         "transition-all duration-200",
         "hover:bg-accent/50 hover:text-foreground",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-        isActive && "bg-primary/10 text-primary font-semibold",
+        isActive && "bg-primary/20 text-primary font-semibold border-l-2 border-primary",
         className
       )}
       aria-current={isActive ? "page" : undefined}

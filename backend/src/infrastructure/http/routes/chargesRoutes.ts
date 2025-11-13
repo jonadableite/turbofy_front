@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { CreateChargeRequestSchema, CreateChargeResponseSchema } from "../schemas/charges";
 import { ZodError } from "zod";
 import { PrismaChargeRepository } from "../../database/PrismaChargeRepository";
-import { StubPaymentProviderAdapter } from "../../adapters/payment/StubPaymentProviderAdapter";
+import { PaymentProviderFactory } from "../../adapters/payment/PaymentProviderFactory";
 import { InMemoryMessagingAdapter } from "../../adapters/messaging/InMemoryMessagingAdapter";
 import { CreateCharge } from "../../../application/useCases/CreateCharge";
 import { logger } from "../../logger";
@@ -25,7 +25,7 @@ chargesRouter.post("/", async (req: Request, res: Response) => {
 
     // Cria instâncias dos adapters (em produção usar DI/container)
     const chargeRepository = new PrismaChargeRepository();
-    const paymentProvider = new StubPaymentProviderAdapter();
+    const paymentProvider = PaymentProviderFactory.create();
     const messaging = new InMemoryMessagingAdapter();
 
     const useCase = new CreateCharge(chargeRepository, paymentProvider, messaging);

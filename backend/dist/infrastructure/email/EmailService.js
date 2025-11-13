@@ -42,5 +42,33 @@ class EmailService {
         });
         logger_1.logger.info({ to }, 'OTP email sent');
     }
+    async sendPasswordResetEmail(to, resetToken) {
+        if (env_1.env.SMTP_AUTH_DISABLED) {
+            logger_1.logger.warn({ to }, 'SMTP disabled; skipping password reset email');
+            return;
+        }
+        const resetUrl = `${env_1.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        const html = this.compileTemplate('password-reset', { resetUrl });
+        await this.transporter.sendMail({
+            from: env_1.env.SMTP_SENDER_EMAIL,
+            to,
+            subject: 'Redefinição de senha - Turbofy',
+            html,
+        });
+        logger_1.logger.info({ to }, 'Password reset email sent');
+    }
+    async sendGenericEmail(to, subject, html) {
+        if (env_1.env.SMTP_AUTH_DISABLED) {
+            logger_1.logger.warn({ to }, 'SMTP disabled; skipping generic email');
+            return;
+        }
+        await this.transporter.sendMail({
+            from: env_1.env.SMTP_SENDER_EMAIL,
+            to,
+            subject,
+            html,
+        });
+        logger_1.logger.info({ to }, 'Generic email sent');
+    }
 }
 exports.EmailService = EmailService;

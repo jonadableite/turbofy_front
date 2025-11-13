@@ -32,12 +32,12 @@ export const TopProducts = ({ products, className }: TopProductsProps) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.3 }}
       className={cn(
-        "rounded-xl border border-border bg-card p-6 shadow-lg",
+        "rounded-xl border border-border/50 glass p-6 shadow-lg",
         className
       )}
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="rounded-lg bg-primary/10 p-2">
+        <div className="rounded-lg bg-primary/20 backdrop-blur-sm p-2 border border-primary/30">
           <Package className="h-5 w-5 text-primary" />
         </div>
         <h2 className="text-xl font-bold text-foreground">
@@ -52,7 +52,7 @@ export const TopProducts = ({ products, className }: TopProductsProps) => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
-            className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+            className="flex items-center justify-between p-4 rounded-lg glass hover:bg-primary/5 transition-colors"
           >
             <div className="flex items-center gap-3">
               {product.icon || (

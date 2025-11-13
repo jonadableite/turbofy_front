@@ -30,6 +30,8 @@ class Charge {
         this.pixQrCode = props.pixQrCode;
         this.pixCopyPaste = props.pixCopyPaste;
         this.boletoUrl = props.boletoUrl;
+        this.pixTxid = props.pixTxid;
+        this.paidAt = props.paidAt;
         this.createdAt = props.createdAt || new Date();
         this.updatedAt = props.updatedAt || new Date();
     }
@@ -44,6 +46,7 @@ class Charge {
     }
     markAsPaid() {
         this._status = ChargeStatus.PAID;
+        this.paidAt = new Date();
     }
     markAsExpired() {
         this._status = ChargeStatus.EXPIRED;
