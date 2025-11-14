@@ -16,6 +16,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 const features = [
   {
@@ -170,6 +171,23 @@ export const PremiumDemo = () => {
 
               {/* Shine effect */}
               <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-linear-to-r from-transparent via-white/10 to-transparent" />
+              
+              {/* Animated Border Beams */}
+              <BorderBeam
+                duration={8}
+                size={200}
+                colorFrom="#72879c"
+                colorTo="transparent"
+                borderWidth={2}
+              />
+              <BorderBeam
+                duration={8}
+                delay={4}
+                size={200}
+                colorFrom="#a4e155"
+                colorTo="transparent"
+                borderWidth={1}
+              />
             </motion.div>
           ))}
         </div>

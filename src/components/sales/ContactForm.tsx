@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, Mail, User, MessageSquare, CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 export const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -275,6 +276,23 @@ export const ContactForm = () => {
                   </a>
                 </p>
               </form>
+              
+              {/* Animated Border Beams */}
+              <BorderBeam
+                duration={10}
+                size={250}
+                colorFrom="#72879c"
+                colorTo="transparent"
+                borderWidth={2}
+              />
+              <BorderBeam
+                duration={10}
+                delay={5}
+                size={250}
+                colorFrom="#a4e155"
+                colorTo="transparent"
+                borderWidth={1}
+              />
             </div>
           </motion.div>
         </div>

@@ -13,6 +13,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 const benefits = [
   {
@@ -157,6 +158,24 @@ export const Benefits = () => {
 
               {/* Shine effect */}
               <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-linear-to-r from-transparent via-white/10 to-transparent" />
+              
+              {/* Animated Border Beams */}
+              <BorderBeam
+                duration={7}
+                delay={index * 1.5}
+                size={180}
+                colorFrom="#72879c"
+                colorTo="transparent"
+                borderWidth={2}
+              />
+              <BorderBeam
+                duration={7}
+                delay={index * 1.5 + 3.5}
+                size={180}
+                colorFrom="#a4e155"
+                colorTo="transparent"
+                borderWidth={1}
+              />
             </motion.div>
           ))}
         </div>
@@ -217,6 +236,23 @@ export const Benefits = () => {
           {/* Background decoration */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+          
+          {/* Animated Border Beams */}
+          <BorderBeam
+            duration={12}
+            size={300}
+            colorFrom="#72879c"
+            colorTo="transparent"
+            borderWidth={2}
+          />
+          <BorderBeam
+            duration={12}
+            delay={6}
+            size={300}
+            colorFrom="#a4e155"
+            colorTo="transparent"
+            borderWidth={1}
+          />
         </motion.div>
       </div>
     </section>
