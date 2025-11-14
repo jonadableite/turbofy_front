@@ -116,8 +116,8 @@ export function InteractiveDotPattern({
       </defs>
        {dots.map((dot, index) => {
          const isNearMouse = mouseInteraction && dot.distance < 120;
-         const opacity = isNearMouse ? Math.max(0.1, 1 - dot.distance / 120) * 0.4 : 0.08;
-         const scale = isNearMouse ? 1 + (1 - dot.distance / 120) * 1.2 : 1;
+         const opacity = isNearMouse ? Math.max(0.1, 1 - dot.distance / 120) * 0.5 : 0.08;
+         const scale = isNearMouse ? 1 + (1 - dot.distance / 120) * 1.5 : 1;
          const useGreen = index % 3 === 0;
 
         return (

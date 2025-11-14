@@ -49,11 +49,11 @@ export const ContactForm = () => {
         height={32}
         cx={1}
         cy={1}
-        cr={0.6}
+        cr={0.5}
         glow={false}
         className={cn(
-          "text-[#a4e155]/8 dark:text-[#a4e155]/5",
-          "[mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,white_15%,transparent_85%)]"
+          "text-[#a4e155]/6 dark:text-[#a4e155]/4",
+          "[mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,white_12%,transparent_88%)]"
         )}
       />
 
