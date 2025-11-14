@@ -201,3 +201,43 @@ body {
   animation: none;
   mix-blend-mode: normal;
 }
+
+/* Scrollbar customizada com gradiente */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #a4e155 0%, #72879c 100%);
+  border-radius: 10px;
+  border: 2px solid hsl(var(--background));
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #8acc3d 0%, #5a6a7d 100%);
+  box-shadow: 0 0 10px rgba(164, 225, 85, 0.5);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #a4e155 hsl(var(--background));
+}
+
+/* Smooth scroll com parallax effect */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

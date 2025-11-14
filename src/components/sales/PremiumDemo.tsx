@@ -18,7 +18,6 @@ import {
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { ParallaxScroll } from "@/components/ui/parallax-scroll";
-import { DotPattern } from "@/components/ui/dot-pattern";
 
 const features = [
   {
@@ -97,18 +96,8 @@ export const PremiumDemo = () => {
   return (
     <ParallaxScroll offset={80}>
       <section id="recursos" className="relative py-24 bg-linear-to-b from-muted/20 to-background overflow-hidden">
-      {/* Dot Pattern Background */}
-      <DotPattern
-        width={32}
-        height={32}
-        cx={1}
-        cy={1}
-        cr={0.5}
-        className={cn(
-          "text-[#a4e155]/8 dark:text-[#a4e155]/5",
-          "[mask-image:linear-gradient(to_bottom,white_20%,transparent_80%)]"
-        )}
-      />
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section header */}
@@ -215,12 +204,12 @@ export const PremiumDemo = () => {
         >
           <motion.a
             href="/register"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#a4e155] to-[#8acc3d] px-8 py-4 text-base font-semibold text-gray-900 shadow-lg shadow-[#a4e155]/25 transition-all hover:shadow-xl hover:shadow-[#a4e155]/40"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#a4e155] via-[#8acc3d] to-[#7ab82f] px-8 h-[56px] text-base font-bold text-gray-900 shadow-[0_10px_30px_rgba(164,225,85,0.3),0_5px_15px_rgba(164,225,85,0.2),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(164,225,85,0.4),0_8px_20px_rgba(164,225,85,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] hover:translate-y-[-2px] active:translate-y-[1px]"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-                <span>Começar Agora - Grátis</span>
-                <Zap className="h-5 w-5" />
+                <span className="drop-shadow-sm">Começar Agora - Grátis</span>
+                <Zap className="h-5 w-5 drop-shadow-sm" />
           </motion.a>
         </motion.div>
       </div>

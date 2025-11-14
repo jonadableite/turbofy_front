@@ -3,8 +3,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Zap, Shield, TrendingUp, CheckCircle2 } from "lucide-react";
 import { SparklesCore } from "@/components/ui/sparkles";
-import { InteractiveDotPattern } from "@/components/ui/interactive-dot-pattern";
-import { cn } from "@/lib/utils";
 
 const stats = [
   { label: "Transações Processadas", value: "10M+" },
@@ -23,32 +21,21 @@ const features = [
 export const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-b from-background via-background to-muted/20">
-      {/* Interactive Dot Pattern Background */}
-      <InteractiveDotPattern
-        width={32}
-        height={32}
-        cx={1}
-        cy={1}
-        cr={0.5}
-        className={cn(
-          "text-neutral-400/15 dark:text-neutral-600/10",
-          "[mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_30%,transparent_100%)]"
-        )}
-        mouseInteraction={true}
-      />
-
       {/* Animated background */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none">
+      <div className="absolute inset-0 w-full h-full">
         <SparklesCore
           id="hero-sparkles"
           background="transparent"
           minSize={0.4}
           maxSize={1}
-          particleDensity={30}
+          particleDensity={50}
           className="w-full h-full"
           particleColor="#a4e155"
         />
       </div>
+
+      {/* Grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
 
       {/* Gradient orbs - cores da marca */}
       <div className="absolute top-1/4 -left-48 w-96 h-96 bg-[#a4e155]/20 rounded-full blur-3xl animate-pulse" />
@@ -66,9 +53,9 @@ export const Hero = () => {
               transition={{ duration: 0.5 }}
               className="inline-flex"
             >
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 border border-primary/20">
-                <Zap className="h-4 w-4 text-primary animate-pulse" />
-                <span className="text-sm font-medium text-primary">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#313133] px-6 py-3 border border-white/10 shadow-lg shadow-black/20">
+                <Zap className="h-4 w-4 text-[#a4e155] animate-pulse" />
+                <span className="text-sm font-medium text-white">
                   🚀 Gateway de Pagamentos #1 do Brasil • 5.000+ Empresas Confiam
                 </span>
               </div>
@@ -82,10 +69,10 @@ export const Hero = () => {
               className="space-y-4"
             >
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
-                <span className="block text-foreground">
+                <span className="block bg-gradient-to-br from-[#ffffff] via-[#e0e0e0] to-[#9d9da0] bg-clip-text text-transparent">
                   Transforme seu negócio com
                 </span>
-                <span className="block bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-[#a4e155] to-[#8acc3d] bg-clip-text text-transparent">
                   pagamentos instantâneos
                 </span>
               </h1>
@@ -122,21 +109,21 @@ export const Hero = () => {
             >
               <motion.a
                 href="/register"
-                className="group relative inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#a4e155] to-[#8acc3d] px-8 py-4 text-base font-bold text-gray-900 shadow-lg shadow-[#a4e155]/25 transition-all hover:shadow-xl hover:shadow-[#a4e155]/40 overflow-hidden"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#a4e155] via-[#8acc3d] to-[#7ab82f] px-8 h-[56px] text-base font-bold text-gray-900 shadow-[0_10px_30px_rgba(164,225,85,0.3),0_5px_15px_rgba(164,225,85,0.2),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(164,225,85,0.4),0_8px_20px_rgba(164,225,85,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] hover:translate-y-[-2px] active:translate-y-[1px] active:shadow-[0_5px_15px_rgba(164,225,85,0.3),inset_0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <span className="relative z-10">Começar Grátis Agora</span>
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1 relative z-10" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#8acc3d] to-[#a4e155] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="relative z-10 drop-shadow-sm">Começar Grátis Agora</span>
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1 relative z-10 drop-shadow-sm" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#8acc3d] via-[#a4e155] to-[#8acc3d] opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
                 href="#demo"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-[#72879c]/30 bg-background/50 backdrop-blur-sm px-8 py-4 text-base font-semibold text-foreground transition-all hover:bg-[#72879c]/10 hover:border-[#72879c]/50"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#72879c]/40 bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm px-8 h-[56px] text-base font-semibold text-foreground shadow-[0_8px_20px_rgba(114,135,156,0.15),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all hover:bg-gradient-to-br hover:from-[#72879c]/20 hover:to-[#72879c]/10 hover:border-[#72879c]/60 hover:shadow-[0_12px_25px_rgba(114,135,156,0.2),inset_0_1px_0_rgba(255,255,255,0.15)] hover:translate-y-[-2px]"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                Ver Demo Gratuita
+                <span className="drop-shadow-sm">Ver Demo Gratuita</span>
               </motion.a>
             </motion.div>
 
