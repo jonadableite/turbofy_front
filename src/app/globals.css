@@ -48,11 +48,11 @@
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 3.9%;
 
-  --primary: 217 91% 60%; /* #3177fa - azul turbofy */
-  --primary-foreground: 0 0% 98%;
+  --primary: 81 71% 61%; /* #a4e155 - verde turbofy */
+  --primary-foreground: 222.2 84% 4.9%;
 
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
+  --secondary: 213 20% 53%; /* #72879c - cinza azulado turbofy */
+  --secondary-foreground: 0 0% 98%;
 
   --muted: 0 0% 96.1%;
   --muted-foreground: 0 0% 45.1%;
@@ -65,7 +65,7 @@
 
   --border: 0 0% 89.8%;
   --input: 0 0% 89.8%;
-  --ring: 0 0% 63.9%;
+  --ring: 81 71% 61%; /* Verde turbofy */
 
   --radius: 0.625rem;
 
@@ -101,7 +101,7 @@
 
 .dark {
   /* Fundo escuro estilo glassmorphism */
-  --background: 220 15% 8%; /* Cinza muito escuro */
+  --background: 240 4% 16%; /* #131316 */
   --foreground: 0 0% 98%;
 
   /* Cards translúcidos com glassmorphism */
@@ -111,11 +111,11 @@
   --popover: 220 15% 12% / 0.9;
   --popover-foreground: 0 0% 98%;
 
-  /* Verde para tendências positivas  */
-  --primary: 83 70% 61%; /* #a4e155 */
-  --primary-foreground: 0 0% 98%;
+  /* Verde turbofy para tendências positivas  */
+  --primary: 81 71% 61%; /* #a4e155 */
+  --primary-foreground: 222.2 84% 4.9%;
 
-  --secondary: 220 15% 18%;
+  --secondary: 213 20% 53%; /* #72879c - cinza azulado turbofy */
   --secondary-foreground: 0 0% 98%;
 
   --muted: 220 15% 18%;
@@ -130,24 +130,24 @@
 
   --border: 220 15% 20% / 0.5; /* Borda semi-transparente */
   --input: 220 15% 15% / 0.7;
-  --ring: 142 71% 45%;
+  --ring: 81 71% 61%; /* Verde turbofy */
 
-  /* Cores dos gráficos */
-  --chart-1: 142 71% 45%; /* Verde */
-  --chart-2: 0 72% 51%; /* Vermelho */
-  --chart-3: 217 91% 60%; /* Azul */
+  /* Cores dos gráficos - cores da marca */
+  --chart-1: 81 71% 61%; /* Verde turbofy */
+  --chart-2: 213 20% 53%; /* Cinza azulado turbofy */
+  --chart-3: 0 72% 51%; /* Vermelho */
   --chart-4: 38 92% 50%; /* Amarelo */
   --chart-5: 280 70% 50%; /* Roxo */
 
   /* Sidebar escura */
   --sidebar: 220 15% 10%;
   --sidebar-foreground: 0 0% 85%;
-  --sidebar-primary: 142 71% 45%;
-  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-primary: 81 71% 61%; /* Verde turbofy */
+  --sidebar-primary-foreground: 222.2 84% 4.9%;
   --sidebar-accent: 220 15% 15%;
   --sidebar-accent-foreground: 0 0% 98%;
   --sidebar-border: 220 15% 20% / 0.3;
-  --sidebar-ring: 142 71% 45%;
+  --sidebar-ring: 81 71% 61%;
 }
 
 .shadow-input {

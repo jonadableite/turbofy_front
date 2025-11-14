@@ -93,13 +93,13 @@ export const Benefits = () => {
           viewport={{ once: true }}
           className="text-center space-y-4 mb-16"
         >
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 border border-primary/20">
-            <TrendingUp className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Por que escolher o Turbofy</span>
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#a4e155]/10 to-[#72879c]/10 px-4 py-2 border border-[#a4e155]/20">
+            <TrendingUp className="h-4 w-4 text-[#a4e155]" />
+            <span className="text-sm font-medium bg-gradient-to-r from-[#a4e155] to-[#72879c] bg-clip-text text-transparent font-semibold">Por que escolher o Turbofy</span>
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold">
             Por que{" "}
-            <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#a4e155] to-[#72879c] bg-clip-text text-transparent">
               5.000+ empresas
             </span>{" "}
             escolheram o Turbofy
@@ -194,7 +194,7 @@ export const Benefits = () => {
             <div className="text-center mb-10">
               <h3 className="text-3xl font-bold mb-3">
                 Comece{" "}
-                <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#a4e155] to-[#72879c] bg-clip-text text-transparent">
                   grátis agora
                 </span>{" "}
                 e pague apenas quando vender
@@ -225,7 +225,7 @@ export const Benefits = () => {
             <div className="text-center mt-10">
               <motion.a
                 href="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-primary to-primary/80 px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/40"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#a4e155] to-[#8acc3d] px-8 py-4 text-base font-semibold text-gray-900 shadow-lg shadow-[#a4e155]/25 transition-all hover:shadow-xl hover:shadow-[#a4e155]/40"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

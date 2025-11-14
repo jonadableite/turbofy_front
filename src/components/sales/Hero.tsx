@@ -37,9 +37,10 @@ export const Hero = () => {
       {/* Grid pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
 
-      {/* Gradient orbs */}
-      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+      {/* Gradient orbs - cores da marca */}
+      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-[#a4e155]/20 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-[#72879c]/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-[#a4e155]/10 to-[#72879c]/10 rounded-full blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-32">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -108,17 +109,17 @@ export const Hero = () => {
             >
               <motion.a
                 href="/register"
-                className="group relative inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-primary to-primary/80 px-8 py-4 text-base font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/40 overflow-hidden"
+                className="group relative inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#a4e155] to-[#8acc3d] px-8 py-4 text-base font-bold text-gray-900 shadow-lg shadow-[#a4e155]/25 transition-all hover:shadow-xl hover:shadow-[#a4e155]/40 overflow-hidden"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <span className="relative z-10">Começar Grátis Agora</span>
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1 relative z-10" />
-                <div className="absolute inset-0 bg-linear-to-r from-primary/90 to-primary/70 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#8acc3d] to-[#a4e155] opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
                 href="#demo"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-primary/30 bg-background/50 backdrop-blur-sm px-8 py-4 text-base font-semibold text-foreground transition-all hover:bg-primary/10 hover:border-primary/50"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-[#72879c]/30 bg-background/50 backdrop-blur-sm px-8 py-4 text-base font-semibold text-foreground transition-all hover:bg-[#72879c]/10 hover:border-[#72879c]/50"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -133,9 +134,9 @@ export const Hero = () => {
               transition={{ duration: 0.5, delay: 0.35 }}
               className="flex items-center gap-3 pt-2"
             >
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#a4e155]/10 border border-[#a4e155]/20">
+                <div className="w-2 h-2 bg-[#a4e155] rounded-full animate-pulse" />
+                <span className="text-xs font-semibold text-[#8acc3d] dark:text-[#a4e155]">
                   Sem cartão de crédito • Cancele quando quiser
                 </span>
               </div>
@@ -184,10 +185,10 @@ export const Hero = () => {
                 transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                 className="relative group"
               >
-                <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-transparent rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg transition-all group-hover:border-primary/30 group-hover:shadow-xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#a4e155]/20 via-[#72879c]/10 to-transparent rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg transition-all group-hover:border-[#a4e155]/30 group-hover:shadow-xl group-hover:shadow-[#a4e155]/10">
                   <div className="space-y-2">
-                    <div className="text-4xl font-bold bg-linear-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+                    <div className="text-4xl font-bold bg-gradient-to-br from-[#a4e155] to-[#72879c] bg-clip-text text-transparent">
                       {stat.value}
                     </div>
                     <div className="text-sm text-muted-foreground">
