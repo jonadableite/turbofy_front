@@ -155,10 +155,11 @@ export function ParallaxBackground({
 
 // Componente para elementos flutuantes
 interface ParallaxFloatingProps {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   depth?: number; // 1-10, quanto maior mais rápido
   delay?: number;
+  style?: React.CSSProperties;
 }
 
 export function ParallaxFloating({
@@ -166,6 +167,7 @@ export function ParallaxFloating({
   className,
   depth = 5,
   delay = 0,
+  style,
 }: ParallaxFloatingProps) {
   const elementRef = useRef<HTMLDivElement>(null);
 
@@ -217,6 +219,7 @@ export function ParallaxFloating({
       )}
       style={{
         transform: "translate3d(0, 0, 0)",
+        ...style,
       }}
     >
       {children}

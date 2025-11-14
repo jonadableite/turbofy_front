@@ -39,9 +39,15 @@ export const Hero = () => {
       <div className="parallax-layer parallax-layer-mid absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
 
       {/* Gradient orbs - cores da marca com parallax */}
-      <ParallaxFloating depth={2} className="absolute top-1/4 -left-48 w-96 h-96 bg-[#a4e155]/20 rounded-full blur-3xl animate-pulse" />
-      <ParallaxFloating depth={3} delay={500} className="absolute bottom-1/4 -right-48 w-96 h-96 bg-[#72879c]/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      <ParallaxFloating depth={1} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-[#a4e155]/10 to-[#72879c]/10 rounded-full blur-3xl" />
+      <ParallaxFloating depth={2}>
+        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-[#a4e155]/20 rounded-full blur-3xl animate-pulse" />
+      </ParallaxFloating>
+      <ParallaxFloating depth={3} delay={500} style={{ animationDelay: '1s' }}>
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-[#72879c]/20 rounded-full blur-3xl animate-pulse" />
+      </ParallaxFloating>
+      <ParallaxFloating depth={1}>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-linear-to-r from-[#a4e155]/10 to-[#72879c]/10 rounded-full blur-3xl" />
+      </ParallaxFloating>
 
       <div className="parallax-layer-content relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-32">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
