@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { ParallaxScroll } from "@/components/ui/parallax-scroll";
 
 const benefits = [
   {
@@ -75,7 +76,8 @@ const comparisonFeatures = [
 
 export const Benefits = () => {
   return (
-    <section id="beneficios" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
+    <ParallaxScroll offset={60}>
+      <section id="beneficios" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full opacity-30">
         <div className="absolute top-1/4 left-0 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
@@ -256,5 +258,6 @@ export const Benefits = () => {
         </motion.div>
       </div>
     </section>
+    </ParallaxScroll>
   );
 };

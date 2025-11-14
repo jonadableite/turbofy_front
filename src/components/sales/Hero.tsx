@@ -65,25 +65,19 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="space-y-6"
+              className="space-y-4"
             >
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
                 <span className="block text-foreground">
-                  Chega de migalhas.
+                  Transforme seu negócio com
                 </span>
-                <span className="block text-foreground mb-2">
-                  Chegou a plataforma
-                </span>
-                <span className="block text-foreground">
-                  dos infoprodutores que
-                </span>
-                <span className="block bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
-                  faturam de verdade.
+                <span className="block bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+                  pagamentos instantâneos
                 </span>
               </h1>
-              <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
-                O único ecossistema onde funis, páginas, mensagens, CRM e checkout{" "}
-                <strong className="text-foreground">trabalham juntos para multiplicar seu faturamento.</strong>
+              <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
+                Aceite Pix, boleto e cartão em uma única plataforma. <strong className="text-foreground">Aumente suas vendas em até 45%</strong> com checkout otimizado, 
+                taxas transparentes a partir de 1,99% e suporte especializado 24/7.
               </p>
             </motion.div>
 
@@ -113,22 +107,22 @@ export const Hero = () => {
               className="flex flex-col sm:flex-row gap-4"
             >
               <motion.a
-                href="#planos"
-                className="group relative inline-flex items-center justify-center gap-2 rounded-xl bg-transparent border-2 border-foreground/20 px-8 py-5 text-base font-semibold text-foreground transition-all hover:border-foreground/40 hover:bg-foreground/5"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                href="/register"
+                className="group relative inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-primary to-primary/80 px-8 py-4 text-base font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/40 overflow-hidden"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10">Ver Planos</span>
+                <span className="relative z-10">Começar Grátis Agora</span>
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1 relative z-10" />
+                <div className="absolute inset-0 bg-linear-to-r from-primary/90 to-primary/70 opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
-                href="/register"
-                className="group relative inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary via-primary/90 to-primary/80 px-8 py-5 text-base font-bold text-background shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/40 overflow-hidden"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                href="#demo"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-primary/30 bg-background/50 backdrop-blur-sm px-8 py-4 text-base font-semibold text-foreground transition-all hover:bg-primary/10 hover:border-primary/50"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10">Começar agora</span>
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1 relative z-10" />
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/70 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Ver Demo Gratuita
               </motion.a>
             </motion.div>
 
