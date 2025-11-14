@@ -28,7 +28,7 @@ export const Hero = () => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-b from-background via-background to-muted/20">
       {/* Animated Background */}
       <AnimatedBackground variant="gradient" colors={["#a4e155", "#72879c"]} />
-      
+
       {/* Parallax Background Layers */}
       <div className="parallax-layer parallax-layer-bg absolute inset-0 w-full h-full pointer-events-none">
         <SparklesCore
@@ -81,14 +81,14 @@ export const Hero = () => {
                 <RevealText className="block bg-gradient-to-br from-[#ffffff] via-[#e0e0e0] to-[#9d9da0] bg-clip-text text-transparent">
                   Transforme seu negócio com
                 </RevealText>
-                <RevealCharacters 
+                <RevealCharacters
                   delay={0.5}
                   className="block bg-gradient-to-r from-[#a4e155] to-[#8acc3d] bg-clip-text text-transparent"
                 >
                   pagamentos instantâneos
                 </RevealCharacters>
               </h1>
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 1.2 }}
@@ -131,14 +131,14 @@ export const Hero = () => {
                 <a href="/register" className="absolute inset-0" />
                 <span className="relative z-10 drop-shadow-sm">Começar Grátis Agora</span>
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2 relative z-10 drop-shadow-sm" />
-                <motion.div 
+                <motion.div
                   className="absolute inset-0 bg-gradient-to-br from-[#8acc3d] via-[#a4e155] to-[#8acc3d]"
                   initial={{ opacity: 0 }}
                   whileHover={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 />
               </MagneticButton>
-              
+
               <MagneticButton
                 magneticStrength={0.3}
                 className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#72879c]/40 bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm px-8 h-[56px] text-base font-semibold text-foreground shadow-[0_8px_20px_rgba(114,135,156,0.15),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all hover:bg-gradient-to-br hover:from-[#72879c]/20 hover:to-[#72879c]/10 hover:border-[#72879c]/60 hover:shadow-[0_12px_25px_rgba(114,135,156,0.2),inset_0_1px_0_rgba(255,255,255,0.15)]"
@@ -209,14 +209,14 @@ export const Hero = () => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8, rotateY: -20 }}
                   animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                  transition={{ 
-                    duration: 0.6, 
+                  transition={{
+                    duration: 0.6,
                     delay: 0.3 + index * 0.1,
                     type: "spring",
                     stiffness: 100
                   }}
-                  whileHover={{ 
-                    scale: 1.05, 
+                  whileHover={{
+                    scale: 1.05,
                     rotateY: 5,
                     transition: { duration: 0.2 }
                   }}
@@ -231,7 +231,7 @@ export const Hero = () => {
                       >
                         {stat.value}
                       </RevealCharacters>
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.7 + index * 0.1 }}
