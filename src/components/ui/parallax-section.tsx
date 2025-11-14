@@ -33,17 +33,17 @@ export function ParallaxSection({
       return;
     }
 
-    // Configurar velocidades baseadas na camada e speed prop
+    // Configurar velocidades baseadas na camada e speed prop (AUMENTADO para mais visibilidade)
     const speedMap = {
-      slow: 0.3,
-      medium: 0.5,
-      fast: 0.8,
+      slow: 0.6,
+      medium: 1.0,
+      fast: 1.5,
     };
 
     const layerMultiplier = {
-      background: 0.5,
-      midground: 1,
-      foreground: 1.5,
+      background: 0.8,
+      midground: 1.2,
+      foreground: 2.0,
     };
 
     const finalSpeed = speedMap[speed] * layerMultiplier[layer];
@@ -182,7 +182,7 @@ export function ParallaxFloating({
     if (prefersReducedMotion) return;
 
     let ticking = false;
-    const speed = depth * 0.1;
+    const speed = depth * 0.2; // DOBRADO para mais visibilidade
 
     const updatePosition = () => {
       const scrolled = window.pageYOffset;

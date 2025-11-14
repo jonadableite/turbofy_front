@@ -68,13 +68,15 @@ export const Partners = () => {
           >
             {allPartners.map((partner, index) => (
               <motion.div
-                key={`${partner.name}-${index}`}
+                key={`partner-${index}-${partner.name}`}
                 className="flex-shrink-0 w-[160px] h-[80px] flex items-center justify-center rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 hover:border-primary/30 hover:shadow-lg transition-all"
                 whileHover={{ scale: 1.05 }}
               >
                 <img
                   src={partner.logo}
                   alt={partner.name}
+                  loading="lazy"
+                  draggable={false}
                   className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100"
                 />
               </motion.div>

@@ -43,8 +43,8 @@ export const ContactForm = () => {
 
   return (
     <ParallaxSection speed="fast" layer="foreground" id="contato" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
-      {/* Background decoration com parallax */}
-      <ParallaxFloating depth={2} className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+      {/* Background decoration com parallax AUMENTADO */}
+      <ParallaxFloating depth={4} className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">

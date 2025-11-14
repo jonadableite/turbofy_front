@@ -367,16 +367,16 @@ html {
   background-attachment: fixed;
 }
 
-/* Responsividade - desabilitar em mobile para performance */
+/* Responsividade - reduzir em mobile para performance mas manter visível */
 @media (max-width: 768px) {
   .parallax-container {
-    perspective: none;
+    perspective: 0.5px;
   }
   
   .parallax-layer-bg,
   .parallax-layer-mid,
   .parallax-layer-fg {
-    transform: none;
+    transform: translateZ(-1px) scale(1.5);
   }
   
   .parallax-bg-fixed {
@@ -388,6 +388,11 @@ html {
   .parallax-float-medium,
   .parallax-float-fast {
     animation-duration: 4s;
+  }
+  
+  /* Reduzir velocidade em mobile mas manter efeito */
+  .parallax-floating {
+    opacity: 0.8;
   }
 }
 
