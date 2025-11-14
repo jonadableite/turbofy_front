@@ -4,10 +4,6 @@ import { motion } from "framer-motion";
 import { ArrowRight, Zap, Shield, TrendingUp, CheckCircle2 } from "lucide-react";
 import { SparklesCore } from "@/components/ui/sparkles";
 import { ParallaxSection, ParallaxFloating } from "@/components/ui/parallax-section";
-import { MagneticButton } from "@/components/ui/magnetic-button";
-import { RevealText, RevealCharacters } from "@/components/ui/reveal-text";
-import { FloatingElement } from "@/components/ui/floating-element";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 
 const stats = [
   { label: "Transações Processadas", value: "10M+" },
@@ -26,9 +22,6 @@ const features = [
 export const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-b from-background via-background to-muted/20">
-      {/* Animated Background */}
-      <AnimatedBackground variant="gradient" colors={["#a4e155", "#72879c"]} />
-
       {/* Parallax Background Layers */}
       <div className="parallax-layer parallax-layer-bg absolute inset-0 w-full h-full pointer-events-none">
         <SparklesCore
@@ -75,29 +68,26 @@ export const Hero = () => {
               </div>
             </motion.div>
 
-            {/* Heading com animação avançada */}
-            <div className="space-y-4">
+            {/* Heading */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="space-y-4"
+            >
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
-                <RevealText className="block bg-gradient-to-br from-[#ffffff] via-[#e0e0e0] to-[#9d9da0] bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-br from-[#ffffff] via-[#e0e0e0] to-[#9d9da0] bg-clip-text text-transparent">
                   Transforme seu negócio com
-                </RevealText>
-                <RevealCharacters
-                  delay={0.5}
-                  className="block bg-gradient-to-r from-[#a4e155] to-[#8acc3d] bg-clip-text text-transparent"
-                >
+                </span>
+                <span className="block bg-gradient-to-r from-[#a4e155] to-[#8acc3d] bg-clip-text text-transparent">
                   pagamentos instantâneos
-                </RevealCharacters>
+                </span>
               </h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-                className="text-xl text-muted-foreground max-w-2xl leading-relaxed"
-              >
+              <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
                 Aceite Pix, boleto e cartão em uma única plataforma. <strong className="text-foreground">Aumente suas vendas em até 45%</strong> com checkout otimizado,
                 taxas transparentes a partir de 1,99% e suporte especializado 24/7.
-              </motion.p>
-            </div>
+              </p>
+            </motion.div>
 
             {/* Features list */}
             <motion.div
@@ -117,35 +107,31 @@ export const Hero = () => {
               ))}
             </motion.div>
 
-            {/* CTA Buttons com efeito magnético */}
+            {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.5 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <MagneticButton
-                magneticStrength={0.4}
-                className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#a4e155] via-[#8acc3d] to-[#7ab82f] px-8 h-[56px] text-base font-bold text-gray-900 shadow-[0_10px_30px_rgba(164,225,85,0.3),0_5px_15px_rgba(164,225,85,0.2),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(164,225,85,0.4),0_8px_20px_rgba(164,225,85,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] overflow-hidden"
+              <motion.a
+                href="/register"
+                className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#a4e155] via-[#8acc3d] to-[#7ab82f] px-8 h-[56px] text-base font-bold text-gray-900 shadow-[0_10px_30px_rgba(164,225,85,0.3),0_5px_15px_rgba(164,225,85,0.2),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(164,225,85,0.4),0_8px_20px_rgba(164,225,85,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] hover:translate-y-[-2px] active:translate-y-[1px] active:shadow-[0_5px_15px_rgba(164,225,85,0.3),inset_0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <a href="/register" className="absolute inset-0" />
                 <span className="relative z-10 drop-shadow-sm">Começar Grátis Agora</span>
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2 relative z-10 drop-shadow-sm" />
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-[#8acc3d] via-[#a4e155] to-[#8acc3d]"
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                />
-              </MagneticButton>
-
-              <MagneticButton
-                magneticStrength={0.3}
-                className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#72879c]/40 bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm px-8 h-[56px] text-base font-semibold text-foreground shadow-[0_8px_20px_rgba(114,135,156,0.15),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all hover:bg-gradient-to-br hover:from-[#72879c]/20 hover:to-[#72879c]/10 hover:border-[#72879c]/60 hover:shadow-[0_12px_25px_rgba(114,135,156,0.2),inset_0_1px_0_rgba(255,255,255,0.15)]"
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1 relative z-10 drop-shadow-sm" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#8acc3d] via-[#a4e155] to-[#8acc3d] opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.a>
+              <motion.a
+                href="#demo"
+                className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#72879c]/40 bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm px-8 h-[56px] text-base font-semibold text-foreground shadow-[0_8px_20px_rgba(114,135,156,0.15),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all hover:bg-gradient-to-br hover:from-[#72879c]/20 hover:to-[#72879c]/10 hover:border-[#72879c]/60 hover:shadow-[0_12px_25px_rgba(114,135,156,0.2),inset_0_1px_0_rgba(255,255,255,0.15)] hover:translate-y-[-2px]"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <a href="#demo" className="absolute inset-0" />
                 <span className="drop-shadow-sm">Ver Demo Gratuita</span>
-              </MagneticButton>
+              </motion.a>
             </motion.div>
 
             {/* Urgency indicator */}
@@ -191,7 +177,7 @@ export const Hero = () => {
             </motion.div>
           </div>
 
-          {/* Right column - Stats Cards com animações avançadas */}
+          {/* Right column - Stats Cards */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -199,50 +185,25 @@ export const Hero = () => {
             className="grid grid-cols-2 gap-4"
           >
             {stats.map((stat, index) => (
-              <FloatingElement
+              <motion.div
                 key={stat.label}
-                intensity="low"
-                duration={3 + index * 0.5}
-                delay={index * 0.2}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                 className="relative group"
               >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, rotateY: -20 }}
-                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.3 + index * 0.1,
-                    type: "spring",
-                    stiffness: 100
-                  }}
-                  whileHover={{
-                    scale: 1.05,
-                    rotateY: 5,
-                    transition: { duration: 0.2 }
-                  }}
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#a4e155]/20 via-[#72879c]/10 to-transparent rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg transition-all group-hover:border-[#a4e155]/30 group-hover:shadow-2xl group-hover:shadow-[#a4e155]/20">
-                    <div className="space-y-2">
-                      <RevealCharacters
-                        delay={0.5 + index * 0.1}
-                        className="text-4xl font-bold bg-gradient-to-br from-[#a4e155] to-[#72879c] bg-clip-text text-transparent"
-                      >
-                        {stat.value}
-                      </RevealCharacters>
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.7 + index * 0.1 }}
-                        className="text-sm text-muted-foreground"
-                      >
-                        {stat.label}
-                      </motion.div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#a4e155]/20 via-[#72879c]/10 to-transparent rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg transition-all group-hover:border-[#a4e155]/30 group-hover:shadow-xl group-hover:shadow-[#a4e155]/10">
+                  <div className="space-y-2">
+                    <div className="text-4xl font-bold bg-gradient-to-br from-[#a4e155] to-[#72879c] bg-clip-text text-transparent">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {stat.label}
                     </div>
                   </div>
-                </motion.div>
-              </FloatingElement>
+                </div>
+              </motion.div>
             ))}
           </motion.div>
         </div>
