@@ -43,7 +43,7 @@ const footerLinks = {
   ],
   legal: [
     { name: "Privacidade", href: "/privacy" },
-    { name: "Termos de Uso", href: "/terms" },
+    { name: "Termos de Uso", href: "/termos-de-uso" },
     { name: "Segurança", href: "/security" },
     { name: "LGPD", href: "/lgpd" },
     { name: "Compliance", href: "/compliance" },
@@ -296,7 +296,7 @@ export const Footer = () => {
                   Política de Privacidade
                 </Link>
                 <span className="text-border">•</span>
-                <Link href="/terms" className="hover:text-primary transition-colors font-medium">
+                <Link href="/termos-de-uso" className="hover:text-primary transition-colors font-medium">
                   Termos de Uso
                 </Link>
                 <span className="text-border">•</span>

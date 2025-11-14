@@ -274,6 +274,10 @@ export const ContactForm = () => {
                   <a href="/privacy" className="text-primary hover:underline">
                     Política de Privacidade
                   </a>
+                  {" "}e{" "}
+                  <a href="/termos-de-uso" className="text-primary hover:underline">
+                    Termos de Uso
+                  </a>
                 </p>
               </form>
               
