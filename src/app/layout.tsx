@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { InteractiveCursor } from "@/components/ui/interactive-cursor";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,8 +57,11 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ cursor: "none" }}
       >
         <ErrorBoundary>
+          <ScrollProgress />
+          <InteractiveCursor />
           <Providers>{children}</Providers>
         </ErrorBoundary>
       </body>
