@@ -1,11 +1,12 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 RUN corepack enable
+RUN corepack prepare pnpm@10.22.0 --activate
 COPY backend/package.json backend/pnpm-lock.yaml backend/tsconfig*.json ./
 COPY backend/prisma ./prisma
 COPY backend/src ./src
 COPY backend/scripts ./scripts
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 RUN pnpm prisma:generate
 RUN pnpm build
 
