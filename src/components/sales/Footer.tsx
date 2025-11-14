@@ -296,7 +296,7 @@ export const Footer = () => {
                   Política de Privacidade
                 </Link>
                 <span className="text-border">•</span>
-                <Link href="/terms" className="hover:text-primary transition-colors font-medium">
+                <Link href="/termos-de-uso" className="hover:text-primary transition-colors font-medium">
                   Termos de Uso
                 </Link>
                 <span className="text-border">•</span>
