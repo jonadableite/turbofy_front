@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { ParallaxScroll } from "@/components/ui/parallax-scroll";
 
 const features = [
   {
@@ -93,6 +94,7 @@ const features = [
 
 export const PremiumDemo = () => {
   return (
+    <ParallaxScroll offset={80}>
     <section id="recursos" className="relative py-24 bg-linear-to-b from-muted/20 to-background overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
@@ -212,5 +214,6 @@ export const PremiumDemo = () => {
         </motion.div>
       </div>
     </section>
+    </ParallaxScroll>
   );
 };
