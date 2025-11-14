@@ -19,7 +19,9 @@ ENV HOSTNAME="0.0.0.0"
 
 # Copiar arquivos standalone
 COPY --from=builder /app/.next/standalone ./
+# Copiar arquivos estáticos para o caminho correto dentro do standalone
 COPY --from=builder /app/.next/static ./.next/static
+# Copiar pasta public
 COPY --from=builder /app/public ./public
 
 # Copiar healthcheck

@@ -53,12 +53,13 @@ const hasValidAuth = (request: NextRequest): boolean => {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Permitir assets estáticos e arquivos de API
+  // Permitir assets estáticos e arquivos de API (sem aplicar CSP)
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/static") ||
-    pathname.includes(".")
+    pathname.startsWith("/favicon.ico") ||
+    pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|css|js|woff|woff2|ttf|eot)$/)
   ) {
     return NextResponse.next();
   }
