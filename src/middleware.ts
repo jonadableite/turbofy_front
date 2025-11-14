@@ -96,29 +96,32 @@ export function middleware(request: NextRequest) {
   response.headers.set("X-XSS-Protection", "1; mode=block");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
-  // CSP ajustado: permitir carregamento seguro de Google Fonts quando necessário.
-  // Mantemos escopos mínimos e não liberamos origens desnecessárias.
+  // CSP ajustado: permitir carregamento seguro de recursos externos necessários
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   const isProduction = process.env.NODE_ENV === "production";
   
   // Em produção, permitir conexões com o domínio da API
   const connectSrc = isProduction && apiUrl.startsWith("https://")
-    ? `'self' ${apiUrl} https://www.google.com`
-    : "'self' http://localhost:3000 ws://localhost:3001 https://www.google.com";
+    ? `'self' ${apiUrl} https://www.google.com https://static.cloudflareinsights.com`
+    : "'self' http://localhost:3000 ws://localhost:3001 https://www.google.com https://static.cloudflareinsights.com";
   
   response.headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      // Scripts: apenas fontes conhecidas necessárias
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com",
-      // Estilos: permitir CSS de fonts.googleapis.com quando usado
+      // Scripts: permitir Google, Cloudflare Insights e scripts inline necessários
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://static.cloudflareinsights.com",
+      // Scripts de elementos: mesma política para elementos <script>
+      "script-src-elem 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://static.cloudflareinsights.com",
+      // Estilos: permitir CSS inline e de fontes externas
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      // Estilos de elementos: mesma política para elementos <style>
+      "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // Imagens: locais, data URIs e HTTPS
       "img-src 'self' data: https:",
       // Fontes: permitir self, data URIs e gstatic (Google Fonts)
       "font-src 'self' data: https://fonts.gstatic.com",
-      // Conexões: backend configurado via variável de ambiente
+      // Conexões: backend configurado via variável de ambiente e Cloudflare
       `connect-src ${connectSrc}`,
     ].join("; ")
   );
