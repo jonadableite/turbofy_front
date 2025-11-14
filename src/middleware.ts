@@ -98,6 +98,14 @@ export function middleware(request: NextRequest) {
 
   // CSP ajustado: permitir carregamento seguro de Google Fonts quando necessário.
   // Mantemos escopos mínimos e não liberamos origens desnecessárias.
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const isProduction = process.env.NODE_ENV === "production";
+  
+  // Em produção, permitir conexões com o domínio da API
+  const connectSrc = isProduction && apiUrl.startsWith("https://")
+    ? `'self' ${apiUrl} https://www.google.com`
+    : "'self' http://localhost:3000 ws://localhost:3001 https://www.google.com";
+  
   response.headers.set(
     "Content-Security-Policy",
     [
@@ -110,8 +118,8 @@ export function middleware(request: NextRequest) {
       "img-src 'self' data: https:",
       // Fontes: permitir self, data URIs e gstatic (Google Fonts)
       "font-src 'self' data: https://fonts.gstatic.com",
-      // Conexões: backend local e hot reload do Next
-      "connect-src 'self' http://localhost:3000 ws://localhost:3001 https://www.google.com",
+      // Conexões: backend configurado via variável de ambiente
+      `connect-src ${connectSrc}`,
     ].join("; ")
   );
 
