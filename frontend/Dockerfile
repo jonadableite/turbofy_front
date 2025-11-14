@@ -2,10 +2,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 RUN corepack enable
 RUN corepack prepare pnpm@10.22.0 --activate
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
-COPY frontend/next.config.ts frontend/tsconfig.json ./
-COPY frontend/public ./public
-COPY frontend/src ./src
+COPY package.json pnpm-lock.yaml ./
+COPY next.config.ts tsconfig.json ./
+COPY public ./public
+COPY src ./src
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build --webpack
 
@@ -17,7 +17,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY frontend/docker/healthcheck.js ./healthcheck.js
+COPY docker/healthcheck.js ./healthcheck.js
 EXPOSE 3131
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["node", "/app/healthcheck.js"]
 ENTRYPOINT ["node"]
