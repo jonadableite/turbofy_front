@@ -33,11 +33,15 @@ COPY --from=builder /app/.next/standalone ./
 
 # IMPORTANTE: No Next.js standalone, os arquivos estáticos devem estar
 # em .next/static relativo ao diretório onde server.js está rodando
-# O standalone já cria essa estrutura, mas precisamos copiar os arquivos
+# Verificar se o diretório existe e copiar recursivamente
+RUN mkdir -p .next/static
 COPY --from=builder /app/.next/static ./.next/static
 
 # Copiar pasta public (necessária para assets públicos)
 COPY --from=builder /app/public ./public
+
+# Verificar se os arquivos CSS foram copiados (debug)
+RUN ls -la .next/static/css/ 2>/dev/null || echo "Aviso: Diretório CSS não encontrado"
 
 # Copiar healthcheck
 COPY docker/healthcheck.js ./healthcheck.js
