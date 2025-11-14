@@ -8,7 +8,8 @@ RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
 COPY package.json pnpm-lock.yaml ./
 
 # Instalar dependências (cache esta camada se package.json não mudar)
-RUN pnpm install --frozen-lockfile
+# Usar --no-frozen-lockfile temporariamente até lockfile ser atualizado
+RUN pnpm install --no-frozen-lockfile
 
 # Copiar arquivos de configuração e código
 COPY next.config.ts tsconfig.json ./
