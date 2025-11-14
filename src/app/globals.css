@@ -241,3 +241,196 @@ html {
     scroll-behavior: smooth;
   }
 }
+
+/* ============================================
+   PARALLAX EFFECT - CSS PURO
+   ============================================ */
+
+/* Container principal com perspectiva 3D */
+.parallax-container {
+  perspective: 1px;
+  perspective-origin: center;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transform-style: preserve-3d;
+}
+
+/* Seções com efeito parallax */
+.parallax-section {
+  position: relative;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Camadas de profundidade */
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Background layer - movimento mais lento */
+.parallax-layer-bg {
+  transform: translateZ(-3px) scale(4);
+  z-index: 0;
+}
+
+/* Midground layer - movimento médio */
+.parallax-layer-mid {
+  transform: translateZ(-2px) scale(3);
+  z-index: 1;
+}
+
+/* Foreground layer - movimento mais rápido */
+.parallax-layer-fg {
+  transform: translateZ(-1px) scale(2);
+  z-index: 2;
+}
+
+/* Content layer - sem movimento parallax */
+.parallax-layer-content {
+  position: relative;
+  transform: translateZ(0);
+  z-index: 3;
+}
+
+/* Otimizações de performance */
+.parallax-section,
+.parallax-layer,
+.parallax-floating,
+.parallax-background {
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
+  transform: translateZ(0);
+  
+  /* Force GPU acceleration */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+  
+  /* Otimizar repaint */
+  will-change: transform;
+}
+
+/* Background attachment fixed para efeito parallax puro CSS */
+.parallax-bg-fixed {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Animações suaves para elementos parallax */
+@keyframes parallax-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -20px, 0);
+  }
+}
+
+.parallax-float-slow {
+  animation: parallax-float 8s ease-in-out infinite;
+}
+
+.parallax-float-medium {
+  animation: parallax-float 5s ease-in-out infinite;
+}
+
+.parallax-float-fast {
+  animation: parallax-float 3s ease-in-out infinite;
+}
+
+/* Gradientes com parallax */
+.parallax-gradient-1 {
+  background: linear-gradient(
+    135deg,
+    rgba(164, 225, 85, 0.1) 0%,
+    rgba(114, 135, 156, 0.05) 100%
+  );
+  background-attachment: fixed;
+}
+
+.parallax-gradient-2 {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(164, 225, 85, 0.15) 0%,
+    transparent 70%
+  );
+  background-attachment: fixed;
+}
+
+/* Responsividade - desabilitar em mobile para performance */
+@media (max-width: 768px) {
+  .parallax-container {
+    perspective: none;
+  }
+  
+  .parallax-layer-bg,
+  .parallax-layer-mid,
+  .parallax-layer-fg {
+    transform: none;
+  }
+  
+  .parallax-bg-fixed {
+    background-attachment: scroll;
+  }
+  
+  /* Manter animações leves em mobile */
+  .parallax-float-slow,
+  .parallax-float-medium,
+  .parallax-float-fast {
+    animation-duration: 4s;
+  }
+}
+
+/* Acessibilidade - respeitar preferências de movimento */
+@media (prefers-reduced-motion: reduce) {
+  .parallax-container {
+    perspective: none;
+  }
+  
+  .parallax-section,
+  .parallax-layer,
+  .parallax-floating,
+  .parallax-background {
+    transform: none !important;
+    animation: none !important;
+    will-change: auto;
+  }
+  
+  .parallax-bg-fixed {
+    background-attachment: scroll;
+  }
+}
+
+/* Performance optimizations */
+@supports (transform: translate3d(0, 0, 0)) {
+  .parallax-section,
+  .parallax-layer {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Blur effect para profundidade */
+.parallax-blur-light {
+  filter: blur(2px);
+  -webkit-filter: blur(2px);
+}
+
+.parallax-blur-medium {
+  filter: blur(4px);
+  -webkit-filter: blur(4px);
+}
+
+.parallax-blur-heavy {
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
+}

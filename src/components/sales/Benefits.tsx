@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { ParallaxScroll } from "@/components/ui/parallax-scroll";
+import { ParallaxSection, ParallaxFloating } from "@/components/ui/parallax-section";
 
 const benefits = [
   {
@@ -77,11 +78,11 @@ const comparisonFeatures = [
 export const Benefits = () => {
   return (
     <ParallaxScroll offset={60}>
-      <section id="beneficios" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full opacity-30">
-        <div className="absolute top-1/4 left-0 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+      <ParallaxSection speed="medium" layer="midground" id="beneficios" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
+      {/* Background decoration com parallax */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full opacity-30 pointer-events-none">
+        <ParallaxFloating depth={3} className="absolute top-1/4 left-0 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
+        <ParallaxFloating depth={4} delay={300} className="absolute bottom-1/4 right-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -257,7 +258,7 @@ export const Benefits = () => {
           />
         </motion.div>
       </div>
-    </section>
+    </ParallaxSection>
     </ParallaxScroll>
   );
 };

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Send, Mail, User, MessageSquare, CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { ParallaxSection, ParallaxFloating } from "@/components/ui/parallax-section";
 
 export const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -41,9 +42,9 @@ export const ContactForm = () => {
   };
 
   return (
-    <section id="contato" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+    <ParallaxSection speed="fast" layer="foreground" id="contato" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
+      {/* Background decoration com parallax */}
+      <ParallaxFloating depth={2} className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -301,6 +302,6 @@ export const ContactForm = () => {
           </motion.div>
         </div>
       </div>
-    </section>
+    </ParallaxSection>
   );
 };
