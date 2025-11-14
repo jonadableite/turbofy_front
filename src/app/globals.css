@@ -101,7 +101,7 @@
 
 .dark {
   /* Fundo escuro estilo glassmorphism */
-  --background: 240 4% 16%; /* #131316 */
+  --background: 220 15% 8%;
   --foreground: 0 0% 98%;
 
   /* Cards translúcidos com glassmorphism */

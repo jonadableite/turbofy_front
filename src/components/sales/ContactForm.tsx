@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Send, Mail, User, MessageSquare, CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 export const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -42,8 +43,19 @@ export const ContactForm = () => {
 
   return (
     <section id="contato" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+      {/* Dot Pattern Background with gradient colors */}
+      <DotPattern
+        width={20}
+        height={20}
+        cx={1}
+        cy={1}
+        cr={1}
+        glow={true}
+        className={cn(
+          "text-[#a4e155]/15 dark:text-[#a4e155]/8",
+          "[mask-image:radial-gradient(ellipse_70%_60%_at_50%_50%,white,transparent)]"
+        )}
+      />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">

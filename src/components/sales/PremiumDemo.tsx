@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { ParallaxScroll } from "@/components/ui/parallax-scroll";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 const features = [
   {
@@ -96,8 +97,18 @@ export const PremiumDemo = () => {
   return (
     <ParallaxScroll offset={80}>
       <section id="recursos" className="relative py-24 bg-linear-to-b from-muted/20 to-background overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+      {/* Dot Pattern Background */}
+      <DotPattern
+        width={20}
+        height={20}
+        cx={1}
+        cy={1}
+        cr={1}
+        className={cn(
+          "text-[#a4e155]/20 dark:text-[#a4e155]/10",
+          "[mask-image:linear-gradient(to_bottom,white,transparent)]"
+        )}
+      />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section header */}

@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Zap, Shield, TrendingUp, CheckCircle2 } from "lucide-react";
 import { SparklesCore } from "@/components/ui/sparkles";
+import { InteractiveDotPattern } from "@/components/ui/interactive-dot-pattern";
+import { cn } from "@/lib/utils";
 
 const stats = [
   { label: "Transações Processadas", value: "10M+" },
@@ -21,21 +23,32 @@ const features = [
 export const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-b from-background via-background to-muted/20">
+      {/* Interactive Dot Pattern Background */}
+      <InteractiveDotPattern
+        width={24}
+        height={24}
+        cx={1}
+        cy={1}
+        cr={1.5}
+        className={cn(
+          "text-neutral-400/30 dark:text-neutral-600/30",
+          "[mask-image:radial-gradient(ellipse_80%_70%_at_50%_0%,#000_40%,transparent_100%)]"
+        )}
+        mouseInteraction={true}
+      />
+
       {/* Animated background */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full pointer-events-none">
         <SparklesCore
           id="hero-sparkles"
           background="transparent"
           minSize={0.4}
           maxSize={1}
-          particleDensity={50}
+          particleDensity={30}
           className="w-full h-full"
           particleColor="#a4e155"
         />
       </div>
-
-      {/* Grid pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
 
       {/* Gradient orbs - cores da marca */}
       <div className="absolute top-1/4 -left-48 w-96 h-96 bg-[#a4e155]/20 rounded-full blur-3xl animate-pulse" />

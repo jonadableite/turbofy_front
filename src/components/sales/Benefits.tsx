@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { ParallaxScroll } from "@/components/ui/parallax-scroll";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 const benefits = [
   {
@@ -78,8 +79,21 @@ export const Benefits = () => {
   return (
     <ParallaxScroll offset={60}>
       <section id="beneficios" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
+      {/* Dot Pattern Background */}
+      <DotPattern
+        width={20}
+        height={20}
+        cx={1}
+        cy={1}
+        cr={1}
+        className={cn(
+          "text-[#72879c]/20 dark:text-[#72879c]/10",
+          "[mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,white,transparent)]"
+        )}
+      />
+      
       {/* Background decoration */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full opacity-30">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full opacity-30 pointer-events-none">
         <div className="absolute top-1/4 left-0 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
       </div>
