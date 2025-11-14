@@ -53,7 +53,7 @@ export const Hero = () => {
               transition={{ duration: 0.5 }}
               className="inline-flex"
             >
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#313133] px-6 py-3 border border-white/10 shadow-lg shadow-black/20">
+              <div className="inline-flex items-center gap-2 rounded-full bg-card px-6 py-3 border border-white/10 shadow-lg shadow-black/20">
                 <Zap className="h-4 w-4 text-[#a4e155] animate-pulse" />
                 <span className="text-sm font-medium text-white">
                   🚀 Gateway de Pagamentos #1 do Brasil • 5.000+ Empresas Confiam
@@ -77,7 +77,7 @@ export const Hero = () => {
                 </span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                Aceite Pix, boleto e cartão em uma única plataforma. <strong className="text-foreground">Aumente suas vendas em até 45%</strong> com checkout otimizado, 
+                Aceite Pix, boleto e cartão em uma única plataforma. <strong className="text-foreground">Aumente suas vendas em até 45%</strong> com checkout otimizado,
                 taxas transparentes a partir de 1,99% e suporte especializado 24/7.
               </p>
             </motion.div>
