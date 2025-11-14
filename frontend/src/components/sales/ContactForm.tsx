@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, Mail, User, MessageSquare, CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 export const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -55,13 +56,13 @@ export const ContactForm = () => {
             className="space-y-8"
           >
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 border border-primary/20">
-                <Mail className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Entre em Contato</span>
+              <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#a4e155]/10 to-[#72879c]/10 px-4 py-2 border border-[#a4e155]/20">
+                <Mail className="h-4 w-4 text-[#a4e155]" />
+                <span className="text-sm font-medium bg-gradient-to-r from-[#a4e155] to-[#72879c] bg-clip-text text-transparent font-semibold">Entre em Contato</span>
               </div>
               <h2 className="text-4xl sm:text-5xl font-bold">
                 Pronto para{" "}
-                <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#a4e155] to-[#72879c] bg-clip-text text-transparent">
                   aumentar suas vendas?
                 </span>
               </h2>
@@ -251,19 +252,19 @@ export const ContactForm = () => {
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  className="group relative w-full inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-primary to-primary/80 px-6 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                  whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-                  whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                  className="group relative w-full inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#a4e155] via-[#8acc3d] to-[#7ab82f] px-6 h-[56px] text-base font-bold text-gray-900 shadow-[0_10px_30px_rgba(164,225,85,0.3),0_5px_15px_rgba(164,225,85,0.2),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(164,225,85,0.4),0_8px_20px_rgba(164,225,85,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] hover:translate-y-[-2px] active:translate-y-[1px] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  whileHover={{ scale: isSubmitting ? 1 : 1.01 }}
+                  whileTap={{ scale: isSubmitting ? 1 : 0.99 }}
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <span>Enviando...</span>
+                      <Loader2 className="h-5 w-5 animate-spin drop-shadow-sm" />
+                      <span className="drop-shadow-sm">Enviando...</span>
                     </>
                   ) : (
                     <>
-                      <span>Enviar Mensagem</span>
-                      <Send className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                      <span className="drop-shadow-sm">Enviar Mensagem</span>
+                      <Send className="h-5 w-5 transition-transform group-hover:translate-x-1 drop-shadow-sm" />
                     </>
                   )}
                 </motion.button>
@@ -273,8 +274,29 @@ export const ContactForm = () => {
                   <a href="/privacy" className="text-primary hover:underline">
                     Política de Privacidade
                   </a>
+                  {" "}e{" "}
+                  <a href="/termos-de-uso" className="text-primary hover:underline">
+                    Termos de Uso
+                  </a>
                 </p>
               </form>
+              
+              {/* Animated Border Beams */}
+              <BorderBeam
+                duration={10}
+                size={250}
+                colorFrom="#72879c"
+                colorTo="transparent"
+                borderWidth={2}
+              />
+              <BorderBeam
+                duration={10}
+                delay={5}
+                size={250}
+                colorFrom="#a4e155"
+                colorTo="transparent"
+                borderWidth={1}
+              />
             </div>
           </motion.div>
         </div>

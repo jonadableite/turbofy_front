@@ -1,12 +1,12 @@
 FROM node:20-alpine AS backend-builder
 WORKDIR /app/backend
-RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.20.0 --activate
 COPY backend/package.json backend/pnpm-lock.yaml ./
 COPY backend/tsconfig*.json ./
 COPY backend/prisma ./prisma
 COPY backend/src ./src
 COPY backend/scripts ./scripts
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 RUN pnpm prisma:generate:force && pnpm build
 
 FROM gcr.io/distroless/nodejs20-debian12:nonroot AS backend-runner
@@ -24,12 +24,12 @@ CMD ["node", "-e", "require('child_process').execSync('node node_modules/.bin/pr
 
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app/frontend
-RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.20.0 --activate
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 COPY frontend/tsconfig.json frontend/next.config.ts ./
 COPY frontend/public ./public
 COPY frontend/src ./src
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 RUN pnpm build --webpack
 
 FROM gcr.io/distroless/nodejs20-debian12:nonroot AS frontend-runner

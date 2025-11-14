@@ -16,6 +16,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BorderBeam } from "@/components/ui/border-beam";
+import { ParallaxScroll } from "@/components/ui/parallax-scroll";
 
 const features = [
   {
@@ -92,7 +94,8 @@ const features = [
 
 export const PremiumDemo = () => {
   return (
-    <section id="recursos" className="relative py-24 bg-linear-to-b from-muted/20 to-background overflow-hidden">
+    <ParallaxScroll offset={80}>
+      <section id="recursos" className="relative py-24 bg-linear-to-b from-muted/20 to-background overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
@@ -105,13 +108,13 @@ export const PremiumDemo = () => {
           viewport={{ once: true }}
           className="text-center space-y-4 mb-16"
         >
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 border border-primary/20">
-            <Zap className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Recursos Completos</span>
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#a4e155]/10 to-[#72879c]/10 px-4 py-2 border border-[#a4e155]/20">
+            <Zap className="h-4 w-4 text-[#a4e155]" />
+            <span className="text-sm font-medium bg-gradient-to-r from-[#a4e155] to-[#72879c] bg-clip-text text-transparent font-semibold">Recursos Completos</span>
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold">
             Tudo em{" "}
-            <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#a4e155] to-[#72879c] bg-clip-text text-transparent">
               uma plataforma única
             </span>
           </h2>
@@ -170,6 +173,23 @@ export const PremiumDemo = () => {
 
               {/* Shine effect */}
               <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-linear-to-r from-transparent via-white/10 to-transparent" />
+              
+              {/* Animated Border Beams */}
+              <BorderBeam
+                duration={8}
+                size={200}
+                colorFrom="#72879c"
+                colorTo="transparent"
+                borderWidth={2}
+              />
+              <BorderBeam
+                duration={8}
+                delay={4}
+                size={200}
+                colorFrom="#a4e155"
+                colorTo="transparent"
+                borderWidth={1}
+              />
             </motion.div>
           ))}
         </div>
@@ -184,15 +204,16 @@ export const PremiumDemo = () => {
         >
           <motion.a
             href="/register"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-primary to-primary/80 px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/40"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#a4e155] via-[#8acc3d] to-[#7ab82f] px-8 h-[56px] text-base font-bold text-gray-900 shadow-[0_10px_30px_rgba(164,225,85,0.3),0_5px_15px_rgba(164,225,85,0.2),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(164,225,85,0.4),0_8px_20px_rgba(164,225,85,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] hover:translate-y-[-2px] active:translate-y-[1px]"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-                <span>Começar Agora - Grátis</span>
-                <Zap className="h-5 w-5" />
+                <span className="drop-shadow-sm">Começar Agora - Grátis</span>
+                <Zap className="h-5 w-5 drop-shadow-sm" />
           </motion.a>
         </motion.div>
       </div>
     </section>
+    </ParallaxScroll>
   );
 };

@@ -168,6 +168,9 @@ importers:
       lucide-react:
         specifier: ^0.553.0
         version: 0.553.0(react@19.2.0)
+      motion:
+        specifier: ^12.23.24
+        version: 12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       next:
         specifier: 16.0.1
         version: 16.0.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -5442,6 +5445,20 @@ packages:
 
   motion-utils@12.23.6:
     resolution: {integrity: sha512-eAWoPgr4eFEOFfg2WjIsMoqJTW6Z8MTUCgn/GZ3VRpClWBdnbjryiA3ZSNLyxCTmCQx4RmYX6jX1iWHbenUPNQ==}
+
+  motion@12.23.24:
+    resolution: {integrity: sha512-Rc5E7oe2YZ72N//S3QXGzbnXgqNrTESv8KKxABR20q2FLch9gHLo0JLyYo2hZ238bZ9Gx6cWhj9VO0IgwbMjCw==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   mqtt-packet@6.10.0:
     resolution: {integrity: sha512-ja8+mFKIHdB1Tpl6vac+sktqy3gA8t9Mduom1BA75cI+R9AHnZOiaBQwpGiWnaVJLDGRdNhQmFaAqd7tkKSMGA==}
@@ -12783,8 +12800,8 @@ snapshots:
       '@next/eslint-plugin-next': 16.0.1
       eslint: 9.39.1(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.39.1(jiti@2.6.1))
@@ -12806,7 +12823,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.1(jiti@2.6.1)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -12817,22 +12834,22 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       eslint: 9.39.1(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.1(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -12843,7 +12860,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.1(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -14542,6 +14559,14 @@ snapshots:
       motion-utils: 12.23.6
 
   motion-utils@12.23.6: {}
+
+  motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      framer-motion: 12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      tslib: 2.8.1
+    optionalDependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
   mqtt-packet@6.10.0:
     dependencies:
