@@ -1,0 +1,13 @@
+/* CSS leve para ser pré-carregado e aplicado globalmente.
+   Mantemos regras mínimas para não conflitar com Tailwind v4. */
+
+:root {
+  /* Evita layout shift mínimo para fontes sem afetar tokens Tailwind */
+  text-rendering: optimizeLegibility;
+}
+
+html, body {
+  /* Garantir suavização em todos navegadores */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
