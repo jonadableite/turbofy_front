@@ -99,14 +99,14 @@ export const PremiumDemo = () => {
       <section id="recursos" className="relative py-24 bg-linear-to-b from-muted/20 to-background overflow-hidden">
       {/* Dot Pattern Background */}
       <DotPattern
-        width={20}
-        height={20}
+        width={28}
+        height={28}
         cx={1}
         cy={1}
-        cr={1}
+        cr={0.7}
         className={cn(
-          "text-[#a4e155]/20 dark:text-[#a4e155]/10",
-          "[mask-image:linear-gradient(to_bottom,white,transparent)]"
+          "text-[#a4e155]/8 dark:text-[#a4e155]/12",
+          "[mask-image:linear-gradient(to_bottom,white_20%,transparent_80%)]"
         )}
       />
 

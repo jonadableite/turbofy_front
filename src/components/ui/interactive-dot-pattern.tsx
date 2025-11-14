@@ -115,9 +115,9 @@ export function InteractiveDotPattern({
         </radialGradient>
       </defs>
       {dots.map((dot, index) => {
-        const isNearMouse = mouseInteraction && dot.distance < 150;
-        const opacity = isNearMouse ? Math.max(0.2, 1 - dot.distance / 150) : 0.2;
-        const scale = isNearMouse ? 1 + (1 - dot.distance / 150) * 2 : 1;
+        const isNearMouse = mouseInteraction && dot.distance < 120;
+        const opacity = isNearMouse ? Math.max(0.15, 1 - dot.distance / 120) * 0.5 : 0.15;
+        const scale = isNearMouse ? 1 + (1 - dot.distance / 120) * 1.5 : 1;
         const useGreen = index % 3 === 0;
 
         return (
@@ -133,9 +133,9 @@ export function InteractiveDotPattern({
                   : `url(#${id}-gradient-blue)`
                 : "currentColor"
             }
-            initial={{ opacity: 0.2, scale: 1 }}
+            initial={{ opacity: 0.15, scale: 1 }}
             animate={{
-              opacity: isNearMouse ? opacity : 0.2,
+              opacity: isNearMouse ? opacity : 0.15,
               scale: isNearMouse ? scale : 1,
             }}
             transition={{

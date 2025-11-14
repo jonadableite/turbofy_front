@@ -25,14 +25,14 @@ export const Hero = () => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-b from-background via-background to-muted/20">
       {/* Interactive Dot Pattern Background */}
       <InteractiveDotPattern
-        width={24}
-        height={24}
+        width={32}
+        height={32}
         cx={1}
         cy={1}
-        cr={1.5}
+        cr={0.8}
         className={cn(
-          "text-neutral-400/30 dark:text-neutral-600/30",
-          "[mask-image:radial-gradient(ellipse_80%_70%_at_50%_0%,#000_40%,transparent_100%)]"
+          "text-neutral-400/10 dark:text-neutral-600/15",
+          "[mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_20%,transparent_100%)]"
         )}
         mouseInteraction={true}
       />

@@ -45,15 +45,15 @@ export const ContactForm = () => {
     <section id="contato" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
       {/* Dot Pattern Background with gradient colors */}
       <DotPattern
-        width={20}
-        height={20}
+        width={30}
+        height={30}
         cx={1}
         cy={1}
-        cr={1}
-        glow={true}
+        cr={0.7}
+        glow={false}
         className={cn(
-          "text-[#a4e155]/15 dark:text-[#a4e155]/8",
-          "[mask-image:radial-gradient(ellipse_70%_60%_at_50%_50%,white,transparent)]"
+          "text-[#a4e155]/6 dark:text-[#a4e155]/10",
+          "[mask-image:radial-gradient(ellipse_50%_40%_at_50%_50%,white_15%,transparent_85%)]"
         )}
       />
 
