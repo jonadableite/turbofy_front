@@ -31,8 +31,8 @@ export const Hero = () => {
         cy={1}
         cr={0.8}
         className={cn(
-          "text-neutral-400/10 dark:text-neutral-600/15",
-          "[mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_20%,transparent_100%)]"
+          "text-neutral-400/20 dark:text-neutral-600/20",
+          "[mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_30%,transparent_100%)]"
         )}
         mouseInteraction={true}
       />

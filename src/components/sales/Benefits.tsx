@@ -81,14 +81,14 @@ export const Benefits = () => {
       <section id="beneficios" className="relative py-24 bg-linear-to-b from-background to-muted/20 overflow-hidden">
       {/* Dot Pattern Background */}
       <DotPattern
-        width={28}
-        height={28}
+        width={30}
+        height={30}
         cx={1}
         cy={1}
-        cr={0.7}
+        cr={0.6}
         className={cn(
-          "text-[#72879c]/8 dark:text-[#72879c]/12",
-          "[mask-image:radial-gradient(ellipse_60%_40%_at_50%_50%,white_15%,transparent_85%)]"
+          "text-[#72879c]/10 dark:text-[#72879c]/6",
+          "[mask-image:radial-gradient(ellipse_70%_50%_at_50%_50%,white_20%,transparent_80%)]"
         )}
       />
       

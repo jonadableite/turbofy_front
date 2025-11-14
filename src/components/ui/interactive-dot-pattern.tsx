@@ -114,11 +114,11 @@ export function InteractiveDotPattern({
           <stop offset="100%" stopColor="#72879c" stopOpacity="0" />
         </radialGradient>
       </defs>
-      {dots.map((dot, index) => {
-        const isNearMouse = mouseInteraction && dot.distance < 120;
-        const opacity = isNearMouse ? Math.max(0.15, 1 - dot.distance / 120) * 0.5 : 0.15;
-        const scale = isNearMouse ? 1 + (1 - dot.distance / 120) * 1.5 : 1;
-        const useGreen = index % 3 === 0;
+       {dots.map((dot, index) => {
+         const isNearMouse = mouseInteraction && dot.distance < 120;
+         const opacity = isNearMouse ? Math.max(0.1, 1 - dot.distance / 120) * 0.4 : 0.08;
+         const scale = isNearMouse ? 1 + (1 - dot.distance / 120) * 1.2 : 1;
+         const useGreen = index % 3 === 0;
 
         return (
           <motion.circle
@@ -133,11 +133,11 @@ export function InteractiveDotPattern({
                   : `url(#${id}-gradient-blue)`
                 : "currentColor"
             }
-            initial={{ opacity: 0.15, scale: 1 }}
-            animate={{
-              opacity: isNearMouse ? opacity : 0.15,
-              scale: isNearMouse ? scale : 1,
-            }}
+             initial={{ opacity: 0.08, scale: 1 }}
+             animate={{
+               opacity: isNearMouse ? opacity : 0.08,
+               scale: isNearMouse ? scale : 1,
+             }}
             transition={{
               duration: 0.3,
               ease: "easeOut",
