@@ -13,10 +13,12 @@ FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3131
+ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY frontend/docker/healthcheck.js ./healthcheck.js
 EXPOSE 3131
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["node", "/app/healthcheck.js"]
-CMD ["node", "server.js"]
+ENTRYPOINT ["node"]
+CMD ["server.js"]
