@@ -1,12 +1,21 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
-RUN corepack enable
-RUN corepack prepare pnpm@10.22.0 --activate
+
+# Habilitar corepack e preparar pnpm em uma única camada
+RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
+
+# Copiar apenas arquivos de dependências primeiro (melhor cache)
 COPY package.json pnpm-lock.yaml ./
+
+# Instalar dependências (cache esta camada se package.json não mudar)
+RUN pnpm install --frozen-lockfile
+
+# Copiar arquivos de configuração e código
 COPY next.config.ts tsconfig.json ./
 COPY public ./public
 COPY src ./src
-RUN pnpm install --no-frozen-lockfile
+
+# Build da aplicação
 RUN pnpm build --webpack
 
 FROM node:20-alpine AS runner
