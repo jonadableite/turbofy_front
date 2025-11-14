@@ -1,11 +1,12 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 RUN corepack enable
-COPY package.json pnpm-lock.yaml ./
-COPY next.config.ts tsconfig.json ./
-COPY public ./public
-COPY src ./src
-RUN pnpm install --frozen-lockfile
+RUN corepack prepare pnpm@10.22.0 --activate
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
+COPY frontend/next.config.ts frontend/tsconfig.json ./
+COPY frontend/public ./public
+COPY frontend/src ./src
+RUN pnpm install --no-frozen-lockfile
 RUN pnpm build --webpack
 
 FROM gcr.io/distroless/nodejs20-debian12:nonroot AS runner
@@ -15,7 +16,7 @@ ENV PORT=3131
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY docker/healthcheck.js ./healthcheck.js
+COPY frontend/docker/healthcheck.js ./healthcheck.js
 EXPOSE 3131
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["node", "/app/healthcheck.js"]
 CMD ["node", "server.js"]
