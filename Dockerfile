@@ -13,6 +13,7 @@ RUN pnpm install --no-frozen-lockfile
 
 # Copiar arquivos de configuração e código
 COPY next.config.ts tsconfig.json ./
+COPY tailwind.config.ts postcss.config.mjs ./
 COPY public ./public
 COPY src ./src
 
@@ -27,11 +28,15 @@ ENV PORT=3131
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME="0.0.0.0"
 
-# Copiar arquivos standalone
+# Copiar arquivos standalone (já inclui a estrutura necessária)
 COPY --from=builder /app/.next/standalone ./
-# Copiar arquivos estáticos para o caminho correto dentro do standalone
+
+# IMPORTANTE: No Next.js standalone, os arquivos estáticos devem estar
+# em .next/static relativo ao diretório onde server.js está rodando
+# O standalone já cria essa estrutura, mas precisamos copiar os arquivos
 COPY --from=builder /app/.next/static ./.next/static
-# Copiar pasta public
+
+# Copiar pasta public (necessária para assets públicos)
 COPY --from=builder /app/public ./public
 
 # Copiar healthcheck
