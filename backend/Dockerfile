@@ -21,5 +21,4 @@ COPY --from=builder /app/prisma ./prisma
 COPY backend/docker/healthcheck.js ./healthcheck.js
 EXPOSE 3030
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["node", "/app/healthcheck.js"]
-ENTRYPOINT ["node"]
 CMD ["dist/index.js"]
